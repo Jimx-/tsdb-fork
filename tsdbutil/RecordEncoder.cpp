@@ -1,7 +1,7 @@
 #include "tsdbutil/RecordEncoder.hpp"
 
-namespace tsdb{
-namespace tsdbutil{
+namespace tsdb {
+namespace tsdbutil {
 
 // ┌────────────────────────────────────────────┐
 // │ type = 1 <1b>                              │
@@ -19,18 +19,14 @@ namespace tsdbutil{
 // └────────────────────────────────────────────┘
 //
 // Series appends the encoded series to b and returns the resulting slice.
-void RecordEncoder::series(const std::deque<RefSeries> & refseries, std::vector<uint8_t> & rec){
+void RecordEncoder::series(const std::vector<RefSeries>& refseries,
+                           std::vector<uint8_t>& rec)
+{
     tsdbutil::EncBuf encbuf(10 * refseries.size());
     encbuf.put_byte(RECORD_SERIES);
 
-    for(const RefSeries & r: refseries){
-        encbuf.put_BE_uint64(r.ref);
-        encbuf.put_unsigned_variant(r.lset.size());
-
-        for(const label::Label & l: r.lset){
-            encbuf.put_uvariant_string(l.label);
-            encbuf.put_uvariant_string(l.value);
-        }
+    for (auto&& r : refseries) {
+        encbuf.put_tsid(r.tsid);
     }
 
     rec.insert(rec.end(), encbuf.b.begin(), encbuf.b.begin() + encbuf.index);
@@ -56,7 +52,8 @@ void RecordEncoder::series(const std::deque<RefSeries> & refseries, std::vector<
 // │ └────────────────────────────────────────────┘ │
 // │                    . . .                       │
 // └────────────────────────────────────────────────┘
-// void RecordEncoder::group_series(const std::deque<RefGroupSeries> & rgs, std::vector<uint8_t> & rec){
+// void RecordEncoder::group_series(const std::deque<RefGroupSeries> & rgs,
+// std::vector<uint8_t> & rec){
 //     int size = 0;
 //     for(const RefGroupSeries & g: rgs)
 //         size += 18 + 10 * g.series.size();
@@ -79,7 +76,8 @@ void RecordEncoder::series(const std::deque<RefSeries> & refseries, std::vector<
 
 //     rec.insert(rec.end(), encbuf.b.begin(), encbuf.b.begin() + encbuf.index);
 // }
-// void RecordEncoder::group_series(const RefGroupSeries & rgs, std::vector<uint8_t> & rec){
+// void RecordEncoder::group_series(const RefGroupSeries & rgs,
+// std::vector<uint8_t> & rec){
 //     tsdbutil::EncBuf encbuf(18 + 10 * rgs.series.size());
 //     encbuf.put_byte(RECORD_GROUP_SERIES);
 //     encbuf.put_BE_uint64(rgs.group_ref);
@@ -108,17 +106,18 @@ void RecordEncoder::series(const std::deque<RefSeries> & refseries, std::vector<
 // └──────────────────────────────────────────────────────────────────┘
 //
 // Samples appends the encoded samples to b and returns the resulting slice.
-void RecordEncoder::samples(const std::deque<RefSample> & refsamples, std::vector<uint8_t> & rec){
-    if(refsamples.empty())
-        return;
+void RecordEncoder::samples(const std::vector<RefSample>& refsamples,
+                            std::vector<uint8_t>& rec)
+{
+    if (refsamples.empty()) return;
     tsdbutil::EncBuf encbuf(10 * refsamples.size());
     encbuf.put_byte(RECORD_SAMPLES);
 
-    encbuf.put_BE_uint64(refsamples[0].ref);
+    encbuf.put_tsid(refsamples[0].tsid);
     encbuf.put_BE_uint64(static_cast<uint64_t>(refsamples[0].t));
     encbuf.put_BE_uint64(base::encode_double(refsamples[0].v));
-    for(int i = 1; i < refsamples.size(); ++ i){
-        encbuf.put_signed_variant(static_cast<int64_t>(refsamples[i].ref) - static_cast<int64_t>(refsamples.front().ref));
+    for (int i = 1; i < refsamples.size(); ++i) {
+        encbuf.put_tsid(refsamples[i].tsid);
         encbuf.put_signed_variant(refsamples[i].t - refsamples.front().t);
         encbuf.put_BE_uint64(base::encode_double(refsamples[i].v));
     }
@@ -143,7 +142,8 @@ void RecordEncoder::samples(const std::deque<RefSample> & refsamples, std::vecto
 // │ └──────────────────────────────────────────────────────────────────┘ │
 // │                                . . .                                 │
 // └──────────────────────────────────────────────────────────────────────┘
-// void RecordEncoder::group_samples(const std::deque<RefGroupSample> & rgs, std::vector<uint8_t> & rec){
+// void RecordEncoder::group_samples(const std::deque<RefGroupSample> & rgs,
+// std::vector<uint8_t> & rec){
 //     if(rgs.empty())
 //         return;
 //     int size = 0;
@@ -160,14 +160,16 @@ void RecordEncoder::samples(const std::deque<RefSample> & refsamples, std::vecto
 //         encbuf.put_BE_uint64(g.ids[0]);
 //         encbuf.put_BE_uint64(base::encode_double(g.samples[0]));
 //         for(int i = 1; i < g.samples.size(); ++ i){
-//             encbuf.put_signed_variant(static_cast<int64_t>(g.ids[i]) - static_cast<int64_t>(g.ids.front()));
+//             encbuf.put_signed_variant(static_cast<int64_t>(g.ids[i]) -
+//             static_cast<int64_t>(g.ids.front()));
 //             encbuf.put_BE_uint64(base::encode_double(g.samples[i]));
 //         }
 //     }
 
 //     rec.insert(rec.end(), encbuf.b.begin(), encbuf.b.begin() + encbuf.index);
 // }
-// void RecordEncoder::group_samples(const RefGroupSample & rgs, std::vector<uint8_t> & rec){
+// void RecordEncoder::group_samples(const RefGroupSample & rgs,
+// std::vector<uint8_t> & rec){
 //     tsdbutil::EncBuf encbuf(10 * rgs.samples.size() + 18);
 //     encbuf.put_byte(RECORD_GROUP_SAMPLES);
 
@@ -178,10 +180,11 @@ void RecordEncoder::samples(const std::deque<RefSample> & refsamples, std::vecto
 //     encbuf.put_BE_uint64(rgs.ids[0]);
 //     encbuf.put_BE_uint64(base::encode_double(rgs.samples[0]));
 //     for(int i = 1; i < rgs.samples.size(); ++ i){
-//         encbuf.put_signed_variant(static_cast<int64_t>(rgs.ids[i]) - static_cast<int64_t>(rgs.ids.front()));
+//         encbuf.put_signed_variant(static_cast<int64_t>(rgs.ids[i]) -
+//         static_cast<int64_t>(rgs.ids.front()));
 //         encbuf.put_BE_uint64(base::encode_double(rgs.samples[i]));
 //     }
-    
+
 //     rec.insert(rec.end(), encbuf.b.begin(), encbuf.b.begin() + encbuf.index);
 // }
 
@@ -194,14 +197,17 @@ void RecordEncoder::samples(const std::deque<RefSample> & refsamples, std::vecto
 // │                        . . .                        │
 // └─────────────────────────────────────────────────────┘
 //
-// Tombstones appends the encoded tombstones to b and returns the resulting slice.
-void RecordEncoder::tombstones(const std::deque<Stone> & stones, std::vector<uint8_t> & rec){
+// Tombstones appends the encoded tombstones to b and returns the resulting
+// slice.
+void RecordEncoder::tombstones(const std::vector<Stone>& stones,
+                               std::vector<uint8_t>& rec)
+{
     tsdbutil::EncBuf encbuf(10 * stones.size());
     encbuf.put_byte(RECORD_TOMBSTONES);
 
-    for(const Stone & s: stones){
-        for(const tombstone::Interval & i: s.itvls){
-            encbuf.put_BE_uint64(s.ref);
+    for (const Stone& s : stones) {
+        for (const tombstone::Interval& i : s.itvls) {
+            encbuf.put_tsid(s.tsid);
             encbuf.put_signed_variant(i.min_time);
             encbuf.put_signed_variant(i.max_time);
         }
@@ -209,7 +215,8 @@ void RecordEncoder::tombstones(const std::deque<Stone> & stones, std::vector<uin
 
     rec.insert(rec.end(), encbuf.b.begin(), encbuf.b.begin() + encbuf.index);
 }
-// void RecordEncoder::group_tombstones(const std::deque<Stone> & stones, std::vector<uint8_t> & rec){
+// void RecordEncoder::group_tombstones(const std::deque<Stone> & stones,
+// std::vector<uint8_t> & rec){
 //     tsdbutil::EncBuf encbuf(10 * stones.size());
 //     encbuf.put_byte(RECORD_GROUP_TOMBSTONES);
 
@@ -223,5 +230,5 @@ void RecordEncoder::tombstones(const std::deque<Stone> & stones, std::vector<uin
 //     rec.insert(rec.end(), encbuf.b.begin(), encbuf.b.begin() + encbuf.index);
 // }
 
-}
-}
+} // namespace tsdbutil
+} // namespace tsdb

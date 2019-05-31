@@ -1,32 +1,35 @@
 #ifndef TOMBSTONEREADERINTERFACE_H
 #define TOMBSTONEREADERINTERFACE_H
 
-#include <boost/function.hpp>
-
 #include "base/Error.hpp"
+#include "common/tsid.h"
 #include "tombstone/Interval.hpp"
 
-namespace tsdb{
-namespace tombstone{
+#include <functional>
 
-class TombstoneReaderInterface{
-    public:
-        typedef boost::function<void (uint64_t, const Intervals &)> IterFunc;
-        typedef boost::function<error::Error (uint64_t, const Intervals &)> ErrIterFunc;
+namespace tsdb {
+namespace tombstone {
 
-        // NOTICE, may throw std::out_of_range.
-        virtual const Intervals & get(uint64_t ref) const=0;
-        virtual void iter(const IterFunc & f) const=0;
-        virtual error::Error iter(const ErrIterFunc & f) const=0;
+class TombstoneReaderInterface {
+public:
+    typedef std::function<void(const common::TSID&, const Intervals&)> IterFunc;
+    typedef std::function<error::Error(const common::TSID&, const Intervals&)>
+        ErrIterFunc;
 
-        // Number of Interval
-        virtual uint64_t total() const=0;
+    // NOTICE, may throw std::out_of_range.
+    virtual const Intervals& get(const common::TSID& tsid) const = 0;
+    virtual void iter(const IterFunc& f) const = 0;
+    virtual error::Error iter(const ErrIterFunc& f) const = 0;
 
-        virtual void add_interval(uint64_t ref, const Interval & itvl){};
+    // Number of Interval
+    virtual uint64_t total() const = 0;
 
-        virtual ~TombstoneReaderInterface()=default;
+    virtual void add_interval(const common::TSID&, const Interval& itvl){};
+
+    virtual ~TombstoneReaderInterface() = default;
 };
 
-}}
+} // namespace tombstone
+} // namespace tsdb
 
 #endif

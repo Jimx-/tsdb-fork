@@ -4,61 +4,51 @@
 #include "base/Mutex.hpp"
 #include "base/ThreadPool.hpp"
 #include "base/WaitGroup.hpp"
+#include "common/tsid.h"
+#include "index/PostingSet.hpp"
 #include "label/Label.hpp"
-#include "index/ListPostings.hpp"
 
-#include <boost/function.hpp>
+#include <cstdint>
 #include <deque>
+#include <functional>
 #include <set>
-#include <stdint.h>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
-namespace tsdb{
-namespace index{
+namespace tsdb {
+namespace index {
 
-void sort_slice(std::deque<uint64_t> * d, base::WaitGroup * wg);
+class MemPostings {
+private:
+    base::RWMutexLock mutex_;
+    std::unordered_set<common::TSID> m;
+    bool ordered;
+    base::WaitGroup wg;
 
-class MemPostings{
-    private:
-        base::RWMutexLock mutex_;
-        std::unordered_map<std::string, std::unordered_map<std::string, std::deque<uint64_t> > > m;
-        bool ordered;
-        base::WaitGroup wg;
+public:
+    MemPostings(bool ordered = false);
 
-    public:
-        MemPostings(bool ordered=false);
+    std::unique_ptr<PostingsInterface> all();
 
-        // Will get a const reference of deque list.
-        // Like slice in Go.
-        std::unique_ptr<PostingsInterface> get(const std::string & label, const std::string & value);
+    // Used under lock.
+    void add(const common::TSID& tsid);
 
-        std::unique_ptr<PostingsInterface> all();
+    void del(const std::unordered_set<common::TSID>& deleted);
 
-        label::Labels sorted_keys();
+    void iter(const std::function<void(const common::TSID&)>& f);
 
-        // Used under lock.
-        void add(uint64_t id, const label::Label & l);
+    // Used under lock.
+    int size();
 
-        void add(uint64_t id, const label::Labels & ls);
+    // This ThreadPool can be shared at the same time.
+    void ensure_order(base::ThreadPool* pool);
 
-        void del(const std::set<uint64_t> & deleted);
+    // This ThreadPool can be shared at the same time.
+    void ensure_order(const std::shared_ptr<base::ThreadPool>& pool);
+};
 
-        void del(const std::unordered_set<uint64_t> & deleted);
-
-        void iter(const boost::function<void (const label::Label &, const ListPostings &)> & f);
-
-        // Used under lock.
-        int size();
-
-        // This ThreadPool can be shared at the same time.
-        void ensure_order(base::ThreadPool * pool);
-
-        // This ThreadPool can be shared at the same time.
-        void ensure_order(const std::shared_ptr<base::ThreadPool> & pool);
-};  
-
-}}
+} // namespace index
+} // namespace tsdb
 
 #endif

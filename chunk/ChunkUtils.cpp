@@ -8,8 +8,8 @@
 #include "chunk/XORChunk.hpp"
 // #include "querier/GroupAllChunkSeriesIterator.hpp"
 
-namespace tsdb{
-namespace chunk{
+namespace tsdb {
+namespace chunk {
 
 const uint32_t MAGIC_CHUNK = 0x51705259;
 const int DEFAULT_CHUNK_SIZE = 512 * 1024 * 1024;
@@ -17,34 +17,42 @@ const int CHUNK_FORMAT_V1 = 1;
 const uint8_t DEFAULT_MEDIAN_SEGMENT = 2;
 const uint8_t DEFAULT_TUPLE_SIZE = 8;
 
-bool is_number(const std::string& s){
+bool is_number(const std::string& s)
+{
     std::string::const_iterator it = s.begin();
-    while (it != s.end() && std::isdigit(*it)) ++it;
+    while (it != s.end() && std::isdigit(*it))
+        ++it;
     return !s.empty() && it == s.end();
 }
 
-std::pair<int, std::string> next_sequence_file(const std::string & dir){
+std::pair<int, std::string> next_sequence_file(const std::string& dir)
+{
     // ATTENTION leave one end byte for \0
     char temp1[7];
     int max = -1;
     boost::filesystem::path p(dir);
-    for(auto& entry : boost::make_iterator_range(boost::filesystem::directory_iterator(p), {})){
+    for (auto& entry : boost::make_iterator_range(
+             boost::filesystem::directory_iterator(p), {})) {
         int temp2 = std::stoi(entry.path().filename().string());
-        if(temp2 > max)
-            max = temp2;
+        if (temp2 > max) max = temp2;
     }
     sprintf(temp1, "%0.6d", max + 1);
-    return {max + 1, (p / boost::filesystem::path(std::string(temp1))).string()};
+    return {max + 1,
+            (p / boost::filesystem::path(std::string(temp1))).string()};
 }
 
 // Will get the path including the dir name
-std::deque<std::string> sequence_files(const std::string & dir){
+std::deque<std::string> sequence_files(const std::string& dir)
+{
     std::deque<std::string> r;
     boost::filesystem::path p(dir);
-    if(!boost::filesystem::exists(p) || !boost::filesystem::is_directory(p))
+    if (!boost::filesystem::exists(p) || !boost::filesystem::is_directory(p))
         return r;
-    for(auto const& entry : boost::make_iterator_range(boost::filesystem::directory_iterator(p), {})){
-        if(entry.path().filename().string().length() >= 6 && is_number(entry.path().filename().string().substr(entry.path().filename().string().length() - 6, 6)))
+    for (auto const& entry : boost::make_iterator_range(
+             boost::filesystem::directory_iterator(p), {})) {
+        if (entry.path().filename().string().length() >= 6 &&
+            is_number(entry.path().filename().string().substr(
+                entry.path().filename().string().length() - 6, 6)))
             r.push_back(entry.path().string());
     }
     std::sort(r.begin(), r.end());
@@ -53,89 +61,98 @@ std::deque<std::string> sequence_files(const std::string & dir){
 
 // merge_chunks vertically merges a and b, i.e., if there is any sample
 // with same timestamp in both a and b, the sample in a is discarded.
-std::pair<std::shared_ptr<chunk::ChunkInterface>, error::Error> merge_chunks(const std::shared_ptr<chunk::ChunkInterface> & c1, const std::shared_ptr<chunk::ChunkInterface> & c2){
-    std::shared_ptr<chunk::ChunkInterface> new_chunk = std::shared_ptr<chunk::XORChunk>(new chunk::XORChunk());
+std::pair<std::shared_ptr<chunk::ChunkInterface>, error::Error>
+merge_chunks(const std::shared_ptr<chunk::ChunkInterface>& c1,
+             const std::shared_ptr<chunk::ChunkInterface>& c2)
+{
+    std::shared_ptr<chunk::ChunkInterface> new_chunk =
+        std::shared_ptr<chunk::XORChunk>(new chunk::XORChunk());
     std::unique_ptr<chunk::ChunkAppenderInterface> app;
-    try{
+    try {
         app = new_chunk->appender();
-    }
-    catch(const base::TSDBException & e){
-        return {std::shared_ptr<chunk::ChunkInterface>(), error::Error(e.what())};
+    } catch (const base::TSDBException& e) {
+        return {std::shared_ptr<chunk::ChunkInterface>(),
+                error::Error(e.what())};
     }
 
     std::unique_ptr<ChunkIteratorInterface> it1 = c1->iterator();
     std::unique_ptr<ChunkIteratorInterface> it2 = c2->iterator();
     bool ok1 = it1->next();
     bool ok2 = it2->next();
-    while(ok1 && ok2){
+    while (ok1 && ok2) {
         std::pair<int64_t, double> p1 = it1->at();
         std::pair<int64_t, double> p2 = it2->at();
-        if(p1.first < p2.first){
+        if (p1.first < p2.first) {
             app->append(p1.first, p1.second);
             ok1 = it1->next();
-        }
-        else if(p1.first > p2.first){
+        } else if (p1.first > p2.first) {
             app->append(p2.first, p2.second);
             ok2 = it2->next();
-        }
-        else{
+        } else {
             app->append(p2.first, p2.second);
             ok1 = it1->next();
             ok2 = it2->next();
         }
     }
 
-    while(ok1){
+    while (ok1) {
         std::pair<int64_t, double> p1 = it1->at();
         app->append(p1.first, p1.second);
         ok1 = it1->next();
     }
-    while(ok2){
+    while (ok2) {
         std::pair<int64_t, double> p2 = it2->at();
         app->append(p2.first, p2.second);
         ok2 = it2->next();
     }
-    
-    if(it1->error())
-        return {std::shared_ptr<chunk::ChunkInterface>(), error::Error("Error in first chunk iterator")};
-    if(it2->error())
-        return {std::shared_ptr<chunk::ChunkInterface>(), error::Error("Error in second chunk iterator")};
+
+    if (it1->error())
+        return {std::shared_ptr<chunk::ChunkInterface>(),
+                error::Error("Error in first chunk iterator")};
+    if (it2->error())
+        return {std::shared_ptr<chunk::ChunkInterface>(),
+                error::Error("Error in second chunk iterator")};
     return {new_chunk, error::Error()};
 }
 
 // merge_overlapping_chunks removes the samples whose timestamp is overlapping.
 // The last appearing sample is retained in case there is overlapping.
 // This assumes that `chunks` are sorted w.r.t. min_time.
-std::pair<std::deque<std::shared_ptr<ChunkMeta>>, error::Error> merge_overlapping_chunks(const std::deque<std::shared_ptr<ChunkMeta>> & chunks){
-    if(chunks.size() < 2)
-        return {chunks, error::Error()};
+std::pair<std::vector<std::shared_ptr<ChunkMeta>>, error::Error>
+merge_overlapping_chunks(const std::vector<std::shared_ptr<ChunkMeta>>& chunks)
+{
+    if (chunks.size() < 2) return {chunks, error::Error()};
 
-    std::deque<std::shared_ptr<ChunkMeta> > new_chunks;
+    std::vector<std::shared_ptr<ChunkMeta>> new_chunks;
     new_chunks.push_back(chunks[0]);
     int last = 0;
-    for(int i = 1; i < chunks.size(); i ++){
+    for (int i = 1; i < chunks.size(); i++) {
         // We need to check only the last chunk in newChks.
-        // Reason: (1) newChks[last-1].MaxTime < newChks[last].MinTime (non overlapping).
-        //         (2) As chks are sorted w.r.t. MinTime, newChks[last].MinTime < c.MinTime.
+        // Reason: (1) newChks[last-1].MaxTime < newChks[last].MinTime (non
+        // overlapping).
+        //         (2) As chks are sorted w.r.t. MinTime, newChks[last].MinTime
+        //         < c.MinTime.
         // So never overlaps with newChks[last-1] or anything before that.
-        if(chunks[i]->min_time > new_chunks[last]->max_time){
+        if (chunks[i]->min_time > new_chunks[last]->max_time) {
             new_chunks.push_back(chunks[i]);
-            ++ last;
+            ++last;
             continue;
         }
-        if(new_chunks[last]->max_time < chunks[i]->max_time)
+        if (new_chunks[last]->max_time < chunks[i]->max_time)
             new_chunks[last]->max_time = chunks[i]->max_time;
 
-        std::pair<std::shared_ptr<chunk::ChunkInterface>, error::Error> chk = merge_chunks(new_chunks[last]->chunk, chunks[i]->chunk);
-        if(chk.second)
-            return {std::deque<std::shared_ptr<ChunkMeta> >(), chk.second};
+        std::pair<std::shared_ptr<chunk::ChunkInterface>, error::Error> chk =
+            merge_chunks(new_chunks[last]->chunk, chunks[i]->chunk);
+        if (chk.second)
+            return {std::vector<std::shared_ptr<ChunkMeta>>(), chk.second};
         new_chunks[last]->chunk = chk.first;
     }
 
     return {new_chunks, error::Error()};
 }
 
-// void next_helper_gacsi_(std::deque<querier::GroupAllChunkSeriesIterator> & its){
+// void next_helper_gacsi_(std::deque<querier::GroupAllChunkSeriesIterator> &
+// its){
 //     auto it = its.begin();
 //     while(it != its.end()){
 //         if(!((*it).next()))
@@ -145,7 +162,8 @@ std::pair<std::deque<std::shared_ptr<ChunkMeta>>, error::Error> merge_overlappin
 //     }
 // }
 
-// void next_helper_gacsi_(std::deque<querier::GroupAllChunkSeriesIterator> & its, const std::deque<int> & id){
+// void next_helper_gacsi_(std::deque<querier::GroupAllChunkSeriesIterator> &
+// its, const std::deque<int> & id){
 //     int d = 0;
 //     for(int i: id){
 //         if(i - d < its.size()){
@@ -158,22 +176,25 @@ std::pair<std::deque<std::shared_ptr<ChunkMeta>>, error::Error> merge_overlappin
 //     }
 // }
 
-// error::Error merge_group_chunks(const std::shared_ptr<querier::GroupChunkSeriesMeta> & gcsm, const std::deque<std::deque<std::shared_ptr<chunk::ChunkMeta>>> & chunks, int start, int end){
+// error::Error merge_group_chunks(const
+// std::shared_ptr<querier::GroupChunkSeriesMeta> & gcsm, const
+// std::deque<std::deque<std::shared_ptr<chunk::ChunkMeta>>> & chunks, int
+// start, int end){
 //     // Prepare iterators from column start to end.
 //     std::deque<querier::GroupAllChunkSeriesIterator> its;
 //     for(int i = start; i < end; ++ i){
-//         std::shared_ptr<querier::GroupChunkSeriesMeta> temp(new querier::GroupChunkSeriesMeta());
-//         temp->push_chunks(chunks.size());
+//         std::shared_ptr<querier::GroupChunkSeriesMeta> temp(new
+//         querier::GroupChunkSeriesMeta()); temp->push_chunks(chunks.size());
 //         for(int j = 0; j < chunks.size(); ++ j)
 //             temp->chunks[j].push_back(chunks[j][i]);
-//         its.emplace_back(temp, chunks[0][i]->min_time,  chunks[0][i]->max_time);
+//         its.emplace_back(temp, chunks[0][i]->min_time,
+//         chunks[0][i]->max_time);
 //     }
 
 //     // chunk::GroupMemoryChunk1 for appending.
-//     std::shared_ptr<chunk::GroupMemoryChunk1> gmc(new chunk::GroupMemoryChunk1(gcsm->chunks.size()));
-//     auto app = gmc->appender();
-//     next_helper_gacsi_(its);
-//     std::deque<int> id;
+//     std::shared_ptr<chunk::GroupMemoryChunk1> gmc(new
+//     chunk::GroupMemoryChunk1(gcsm->chunks.size())); auto app =
+//     gmc->appender(); next_helper_gacsi_(its); std::deque<int> id;
 //     while(!its.empty()){
 //         id.clear();
 //         int64_t mint = its[0].at().first;
@@ -187,23 +208,25 @@ std::pair<std::deque<std::shared_ptr<ChunkMeta>>, error::Error> merge_overlappin
 //             else if(its[i].at().first == mint)
 //                 id.push_back(i);
 //         }
-//         app->append_group(its[id.back()].at().first, its[id.back()].at().second);
-//         next_helper_gacsi_(its, id);
+//         app->append_group(its[id.back()].at().first,
+//         its[id.back()].at().second); next_helper_gacsi_(its, id);
 //     }
 //     for(int i = 0; i < gcsm->chunks.size(); ++ i){
 //         gcsm->chunks[i].back()->series_ref = i; // Change to GMC index.
-//         gcsm->chunks[i].back()->chunk = std::static_pointer_cast<chunk::ChunkInterface>(gmc);
+//         gcsm->chunks[i].back()->chunk =
+//         std::static_pointer_cast<chunk::ChunkInterface>(gmc);
 //     }
 //     return error::Error();
 // }
 
-
-// std::pair<std::shared_ptr<querier::GroupChunkSeriesMeta>, error::Error> merge_overlapping_group_chunks(const std::deque<std::deque<std::shared_ptr<chunk::ChunkMeta>>> & chunks){
+// std::pair<std::shared_ptr<querier::GroupChunkSeriesMeta>, error::Error>
+// merge_overlapping_group_chunks(const
+// std::deque<std::deque<std::shared_ptr<chunk::ChunkMeta>>> & chunks){
 //     if(chunks.empty() || chunks[0].size() < 2)
 //         return {nullptr, error::Error()};
 
-//     std::shared_ptr<querier::GroupChunkSeriesMeta> gcsm(new querier::GroupChunkSeriesMeta());
-//     gcsm->push_chunks(chunks.size());
+//     std::shared_ptr<querier::GroupChunkSeriesMeta> gcsm(new
+//     querier::GroupChunkSeriesMeta()); gcsm->push_chunks(chunks.size());
 //     for(int i = 0; i < chunks.size(); ++ i)
 //         gcsm->chunks[i].push_back(chunks[i][0]);
 //     int last = 0;
@@ -219,7 +242,8 @@ std::pair<std::deque<std::shared_ptr<ChunkMeta>>, error::Error> merge_overlappin
 //         int64_t temp_max = gcsm->chunks[0][last]->max_time;
 //         if(temp_max < chunks[0][i]->max_time)
 //             temp_max = chunks[0][i]->max_time;
-//         while(end < chunks[0].size() && chunks[0][end]->min_time <= temp_max){
+//         while(end < chunks[0].size() && chunks[0][end]->min_time <=
+//         temp_max){
 //             if(temp_max < chunks[0][end]->max_time)
 //                 temp_max = chunks[0][end]->max_time;
 //             ++ end;
@@ -239,4 +263,5 @@ std::pair<std::deque<std::shared_ptr<ChunkMeta>>, error::Error> merge_overlappin
 //     }
 // }
 
-}}
+} // namespace chunk
+} // namespace tsdb

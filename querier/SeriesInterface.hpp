@@ -1,22 +1,20 @@
 #ifndef SERIESINTERFACE_H
 #define SERIESINTERFACE_H
 
-#include "querier/SeriesIteratorInterface.hpp"
 #include "label/Label.hpp"
+#include "querier/SeriesIteratorInterface.hpp"
 
-namespace tsdb{
-namespace querier{
+namespace tsdb {
+namespace querier {
 
-class SeriesInterface{
-    public:
-        virtual const label::Labels & labels() const=0;
+class SeriesInterface {
+public:
+    virtual std::unique_ptr<SeriesIteratorInterface> iterator() = 0;
 
-        virtual std::unique_ptr<SeriesIteratorInterface> iterator()=0;
-
-        virtual ~SeriesInterface()=default;
+    virtual ~SeriesInterface() = default;
 };
 
-}
-}
+} // namespace querier
+} // namespace tsdb
 
 #endif

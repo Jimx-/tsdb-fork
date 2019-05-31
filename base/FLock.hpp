@@ -5,48 +5,50 @@
 #include <sys/file.h>
 
 #include "base/Error.hpp"
+#include <cstdio>
+#include <unistd.h>
 
-namespace tsdb{
-namespace base{
+namespace tsdb {
+namespace base {
 
 // Currently support Unix.
-class FLock{
-    private:
-        FILE * f;
-        bool released;
-        error::Error err_;
+class FLock {
+private:
+    int fd;
+    bool released;
+    error::Error err_;
 
-    public:
-        FLock(): f(NULL), released(false){}
+public:
+    FLock() : fd(-1), released(false) {}
 
-        FLock(const std::string & filename): f(NULL), released(false){
-            if((f = fopen(filename.c_str(), "wb")) == NULL){
-                err_.set("cannot open lock file " + filename);
-                return;
-            }
-            if(flock(fileno(f), LOCK_EX | LOCK_NB) != 0){
-                err_.set("cannot hold lock");
-            }
+    FLock(const std::string& filename) : fd(-1), released(true)
+    {
+        if ((fd = open(filename.c_str(), O_WRONLY | O_CREAT)) == -1) {
+            err_.set("cannot open lock file " + filename);
+            return;
         }
-
-        void release(){
-            if(!released && f != NULL){
-                flock(fileno(f), LOCK_UN | LOCK_NB);
-                fclose(f);
-                released = true;
-            }
+        if (flock(fd, LOCK_EX | LOCK_NB) != 0) {
+            err_.set("cannot hold lock");
         }
+        released = false;
+    }
 
-        error::Error error(){
-            return err_;
+    void release()
+    {
+        if (!released && fd != -1) {
+            flock(fd, LOCK_UN | LOCK_NB);
+            ::close(fd);
+            fd = -1;
+            released = true;
         }
+    }
 
-        ~FLock(){
-            release();
-        }
+    error::Error error() { return err_; }
+
+    ~FLock() { release(); }
 };
 
-}
-}
+} // namespace base
+} // namespace tsdb
 
 #endif

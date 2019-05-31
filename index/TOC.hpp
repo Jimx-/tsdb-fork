@@ -6,44 +6,42 @@
 
 #include "tsdbutil/ByteSlice.hpp"
 
-namespace tsdb{
-namespace index{
+namespace tsdb {
+namespace index {
 
-extern const int INDEX_TOC_LEN;         // 6 fields + crc32
-extern const int INDEX_GROUP_TOC_LEN;   // 8 fields + crc32
+extern const int INDEX_TOC_LEN;       // 2 fields + crc32
+extern const int INDEX_GROUP_TOC_LEN; // 8 fields + crc32
 
-class TOC{
-    public:
-        uint64_t symbols;
-        uint64_t series;
-        uint64_t label_indices;
-        uint64_t label_indices_table;
-        uint64_t postings;
-        uint64_t postings_table;
+class TOC {
+public:
+    uint64_t series;
+    uint64_t label_indices_table;
 };
 
-class GroupTOC{
-    public:
-        uint64_t symbols;
-        uint64_t series;
-        uint64_t label_indices;
-        uint64_t label_indices_table;
-        uint64_t postings;
-        uint64_t postings_table;
-        uint64_t group_postings;
-        uint64_t group_postings_table;
+class GroupTOC {
+public:
+    uint64_t symbols;
+    uint64_t series;
+    uint64_t label_indices;
+    uint64_t label_indices_table;
+    uint64_t postings;
+    uint64_t postings_table;
+    uint64_t group_postings;
+    uint64_t group_postings_table;
 };
 
 // return false if error
-std::pair<TOC, bool> toc_from_ByteSlice(const tsdbutil::ByteSlice * bs);
-std::pair<GroupTOC, bool> group_toc_from_ByteSlice(const tsdbutil::ByteSlice * bs);
+std::pair<TOC, bool> toc_from_ByteSlice(const tsdbutil::ByteSlice* bs);
+std::pair<GroupTOC, bool>
+group_toc_from_ByteSlice(const tsdbutil::ByteSlice* bs);
 
-std::string toc_string(const TOC & toc);
-std::string group_toc_string(const GroupTOC & toc);
+std::string toc_string(const TOC& toc);
+std::string group_toc_string(const GroupTOC& toc);
 
-std::string toc_portion_string(const TOC & toc, uint64_t pos);
-std::string group_toc_portion_string(const GroupTOC & toc, uint64_t pos);
+std::string toc_portion_string(const TOC& toc, uint64_t pos);
+std::string group_toc_portion_string(const GroupTOC& toc, uint64_t pos);
 
-}}
+} // namespace index
+} // namespace tsdb
 
 #endif
