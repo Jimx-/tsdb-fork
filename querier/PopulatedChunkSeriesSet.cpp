@@ -5,7 +5,9 @@ namespace querier {
 
 // Similar to BaseChunkSeriesSet, but it has two extra
 // fields: 1.min_time 2.max_time, which are used for filtering the chunks not in
-// time range. NOTE(Alec), PopulatedChunkSeriesSet coarse-grained filters the
+// time range.
+
+// NOTE(Alec), PopulatedChunkSeriesSet coarse-grained filters the
 // chunks using min_time and max_time.
 PopulatedChunkSeriesSet::PopulatedChunkSeriesSet(
     const std::shared_ptr<ChunkSeriesSetInterface>& set,

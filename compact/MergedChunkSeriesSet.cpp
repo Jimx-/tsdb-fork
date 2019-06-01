@@ -25,10 +25,18 @@ bool MergedChunkSeriesSet::next_helper() const
         return false;
     }
 
+    csm->tsid = sets->at(0)->at()->tsid;
     id.push_back(0);
     for (int i = 1; i < sets->size(); i++) {
-        id.push_back(i);
+        if (sets->at(i)->at()->tsid < csm->tsid) {
+            id.clear();
+            id.push_back(i);
+            csm->tsid = sets->at(i)->at()->tsid;
+        } else if (sets->at(i)->at()->tsid == csm->tsid) {
+            id.push_back(i);
+        }
     }
+
     for (int i : id) {
         csm->chunks.insert(csm->chunks.end(), sets->at(i)->at()->chunks.begin(),
                            sets->at(i)->at()->chunks.end());

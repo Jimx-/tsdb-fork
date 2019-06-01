@@ -127,12 +127,6 @@ bool IndexReader::read_offset_table(uint64_t offset)
 // ├─────────────────────────────────────────────────────────────────────────┤
 // │ ┌──────────────────┬──────────────────────────────────────────────────┐ │
 // │ │                  │ ┌──────────────────────────────────────────┐     │ │
-// │ │                  │ │ ref(l_i.name) <uvarint>                  │     │ │
-// │ │     #labels      │ ├──────────────────────────────────────────┤ ... │ │
-// │ │    <uvarint>     │ │ ref(l_i.value) <uvarint>                 │     │ │
-// │ │                  │ └──────────────────────────────────────────┘     │ │
-// │ ├──────────────────┼──────────────────────────────────────────────────┤ │
-// │ │                  │ ┌──────────────────────────────────────────┐     │ │
 // │ │                  │ │ c_0.mint <varint>                        │     │ │
 // │ │                  │ ├──────────────────────────────────────────┤     │ │
 // │ │                  │ │ c_0.maxt - c_0.mint <uvarint>            │     │ │
@@ -159,7 +153,9 @@ bool IndexReader::series(
 {
     if (!b) return false;
 
-    auto ref = offset_table[tsid];
+    auto it = offset_table.find(tsid);
+    if (it == offset_table.end()) return false;
+    auto ref = it->second;
     ref *= 16;
 
     const uint8_t* start = (b->range(ref, ref + base::MAX_VARINT_LEN_64)).first;
@@ -167,7 +163,6 @@ bool IndexReader::series(
     uint64_t len =
         base::decode_unsigned_varint(start, decoded, base::MAX_VARINT_LEN_64);
     tsdbutil::DecBuf dec_buf(start + decoded, len);
-
     // Decode the Chunks
     uint64_t num_chunks = dec_buf.get_unsigned_variant();
     if (num_chunks == 0) return true;

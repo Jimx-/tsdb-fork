@@ -18,6 +18,7 @@ bool CompactionChunkSeriesSet::next() const
     if (!p->next()) return false;
 
     csm->clear();
+    csm->tsid = p->at();
     try {
         csm->intervals = tr->get(p->at());
     } catch (const std::out_of_range& e) {

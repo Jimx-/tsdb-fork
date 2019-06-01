@@ -28,7 +28,6 @@ bool MergedSeriesSet::next_helper() const
 
     id.push_back(0);
     for (int i = 1; i < ss->size(); i++) {
-
         id.push_back(i);
     }
     for (int i : id)

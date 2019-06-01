@@ -25,6 +25,11 @@ public:
 
     bool operator!=(const TSID& rhs) const { return !(*this == rhs); }
 
+    bool operator<(const TSID& rhs) const
+    {
+        return uuid_compare(uuid, rhs.uuid) < 0;
+    }
+
     std::string to_string() const
     {
         char buf[36];
