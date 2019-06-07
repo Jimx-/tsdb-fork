@@ -21,6 +21,7 @@ private:
 public:
     ChainSeries(const std::shared_ptr<Series>& series);
 
+    common::TSID tsid();
     std::unique_ptr<SeriesIteratorInterface> iterator();
 };
 

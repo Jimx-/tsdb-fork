@@ -7,6 +7,8 @@
 #include "querier/QuerierUtils.hpp"
 #include "tombstone/MemTombstones.hpp"
 
+#include <unordered_set>
+
 namespace tsdb {
 namespace querier {
 
@@ -32,7 +34,7 @@ public:
         const std::shared_ptr<tombstone::TombstoneReaderInterface>& tr =
             std::shared_ptr<tombstone::TombstoneReaderInterface>(
                 new tombstone::MemTombstones()),
-        const std::initializer_list<common::TSID>& list = {});
+        const std::unordered_set<common::TSID>& list = {});
 
     // next() always called before at().
     const std::shared_ptr<ChunkSeriesMeta>& at() const;

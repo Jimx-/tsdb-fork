@@ -17,7 +17,7 @@ Querier::Querier(const std::vector<std::shared_ptr<QuerierInterface>>& queriers)
 {}
 
 std::shared_ptr<SeriesSetInterface>
-Querier::select(const std::initializer_list<common::TSID>& l) const
+Querier::select(const std::unordered_set<common::TSID>& l) const
 {
     std::shared_ptr<SeriesSets> ss(new SeriesSets());
     for (auto const& querier : queriers) {

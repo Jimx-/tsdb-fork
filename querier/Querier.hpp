@@ -1,7 +1,7 @@
 #ifndef QUERIER_H
 #define QUERIER_H
 
-#include <initializer_list>
+#include <unordered_set>
 
 #include "querier/QuerierInterface.hpp"
 
@@ -19,7 +19,7 @@ public:
     Querier(const std::vector<std::shared_ptr<QuerierInterface>>& queriers);
 
     std::shared_ptr<SeriesSetInterface>
-    select(const std::initializer_list<common::TSID>& l) const;
+    select(const std::unordered_set<common::TSID>& l) const;
 
     error::Error error() const;
 };

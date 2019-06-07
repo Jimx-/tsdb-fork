@@ -16,11 +16,10 @@ namespace querier {
 BaseChunkSeriesSet::BaseChunkSeriesSet(
     const std::shared_ptr<block::IndexReaderInterface>& ir,
     const std::shared_ptr<tombstone::TombstoneReaderInterface>& tr,
-    const std::initializer_list<common::TSID>& list)
+    const std::unordered_set<common::TSID>& list)
     : ir(ir), tr(tr), cm(new ChunkSeriesMeta()), err_(false)
 {
-    std::unordered_set<common::TSID> set(list);
-    p = std::make_unique<index::PostingSet>(set);
+    p = std::make_unique<index::PostingSet>(list);
 }
 
 // next() always called before at().
