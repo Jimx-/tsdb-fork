@@ -110,7 +110,7 @@ int IndexWriter::ensure_stage(IndexWriterStage s)
 // NOTICE: The ref here is just a temporary ref assigned as monotonically
 // increasing id in memory.
 int IndexWriter::add_series(
-    const common::TSID& tsid,
+    const tagtree::TSID& tsid,
     const std::vector<std::shared_ptr<chunk::ChunkMeta>>& chunks)
 {
     if (ensure_stage(IDX_STAGE_SERIES) == -1) return INVALID_STAGE;

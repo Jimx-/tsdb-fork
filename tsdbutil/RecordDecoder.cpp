@@ -193,7 +193,7 @@ error::Error RecordDecoder::samples(const std::vector<uint8_t>& rec,
         return error::Error("invalid record type");
     if (decbuf.len() == 0) return error::Error();
 
-    common::TSID tsid = decbuf.get_tsid();
+    tagtree::TSID tsid = decbuf.get_tsid();
     int64_t base_time = static_cast<int64_t>(decbuf.get_BE_uint64());
     uint64_t value = decbuf.get_BE_uint64();
     refsamples.emplace_back(tsid, base_time, base::decode_double(value));

@@ -19,7 +19,7 @@ public:
     HeadChunkReader(Head* head, int64_t min_time, int64_t max_time);
 
     std::pair<std::shared_ptr<chunk::ChunkInterface>, bool>
-    chunk(const common::TSID& tsid, uint64_t ref);
+    chunk(const tagtree::TSID& tsid, uint64_t ref);
 
     // Will not use.
     bool error() { return false; }

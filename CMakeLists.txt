@@ -1,12 +1,50 @@
-cmake_minimum_required (VERSION 2.8)
-
+cmake_minimum_required(VERSION 3.5)
 project(tsdb)
 
 set(CMAKE_CXX_STANDARD 17)
 
 set(TOPDIR ${PROJECT_SOURCE_DIR})
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${TOPDIR}/cmake")
 
-include_directories(${TOPDIR})
+FIND_PACKAGE(Boost COMPONENTS system filesystem iostreams)
+if (NOT Boost_FOUND)
+    message(FATAL_ERROR "Fatal error: Boost (version >= 1.55) required.")
+else()
+    message(STATUS "Setting up BOOST")
+    message(STATUS " Includes - ${Boost_INCLUDE_DIRS}")
+    message(STATUS " Library  - ${Boost_LIBRARY_DIRS}")
+    message(STATUS " boost_system ${Boost_SYSTEM_LIBRARY}")
+    message(STATUS " boost_filesystem ${Boost_FILESYSTEM_LIBRARY}")
+    message(STATUS " boost_iostreams ${Boost_IOSTREAMS_LIBRARY}")
+    include_directories(${Boost_INCLUDE_DIRS})
+    link_directories(${Boost_LIBRARY_DIRS})
+endif (NOT Boost_FOUND)
+
+# Find libuuid
+find_package(Libuuid REQUIRED)
+if (NOT LIBUUID_FOUND)
+   message(FATAL_ERROR "You might need to install libuuid first")
+endif()
+
+add_subdirectory(promql)
+
+include_directories(
+    ${TOPDIR}
+    ${TOPDIR}/promql/include
+    ${LIBUUID_INCLUDE_DIRS}
+)
+
+add_subdirectory(tagtree)
+include_directories(
+    ${TAGTREE_INCLUDE_DIRS}
+)
+
+set(SOURCE_FILES
+    main.cpp)
+            
+set(HEADER_FILES )
+
+set(EXT_SOURCE_FILES )
 
 add_subdirectory("${TOPDIR}/base"  "${CMAKE_CURRENT_BINARY_DIR}/base")
 add_subdirectory("${TOPDIR}/block"  "${CMAKE_CURRENT_BINARY_DIR}/block")
@@ -22,3 +60,32 @@ add_subdirectory("${TOPDIR}/tombstone"  "${CMAKE_CURRENT_BINARY_DIR}/tombstone")
 add_subdirectory("${TOPDIR}/wal"  "${CMAKE_CURRENT_BINARY_DIR}/wal")
 add_subdirectory("${TOPDIR}/tsdbutil"  "${CMAKE_CURRENT_BINARY_DIR}/tsdbutil")
 
+set(LIBRARIES
+    pthread
+    atomic
+    simple-web-server
+    promql
+    tagtree
+    -Wl,--whole-archive
+    Base
+    Block
+    Chunk
+    Compact
+    DB
+    External
+    Head
+    Index
+    Label
+    Querier
+    Tombstone
+    TSDBUtil
+    Wal
+    -Wl,--no-whole-archive
+    ${Boost_IOSTREAMS_LIBRARY}
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
+    ${LIBUUID_LIBRARY}
+)
+ 
+add_executable(tsdb ${SOURCE_FILES} ${HEADER_FILES} ${EXT_SOURCE_FILES})
+target_link_libraries(tsdb ${LIBRARIES}) 

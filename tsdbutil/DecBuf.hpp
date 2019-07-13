@@ -5,7 +5,7 @@
 #include <string>
 
 #include "base/Endian.hpp"
-#include "common/tsid.h"
+#include "tagtree/tsid.h"
 
 namespace tsdb {
 namespace tsdbutil {
@@ -147,7 +147,7 @@ public:
         return r;
     }
 
-    common::TSID get_tsid()
+    tagtree::TSID get_tsid()
     {
         if (err != NO_ERR) return 0;
         if (index + 36 >= size) {
@@ -156,7 +156,7 @@ public:
         }
 
         std::string rep(reinterpret_cast<const char*>(b) + index, 36);
-        common::TSID r(rep);
+        tagtree::TSID r(rep);
 
         index += 36;
         return r;

@@ -4,7 +4,7 @@
 #include "base/Mutex.hpp"
 #include "base/ThreadPool.hpp"
 #include "base/WaitGroup.hpp"
-#include "common/tsid.h"
+#include "tagtree/tsid.h"
 #include "index/PostingSet.hpp"
 #include "label/Label.hpp"
 
@@ -22,7 +22,7 @@ namespace index {
 class MemPostings {
 private:
     base::RWMutexLock mutex_;
-    std::unordered_set<common::TSID> m;
+    std::unordered_set<tagtree::TSID> m;
     bool ordered;
     base::WaitGroup wg;
 
@@ -32,11 +32,11 @@ public:
     std::unique_ptr<PostingsInterface> all();
 
     // Used under lock.
-    void add(const common::TSID& tsid);
+    void add(const tagtree::TSID& tsid);
 
-    void del(const std::unordered_set<common::TSID>& deleted);
+    void del(const std::unordered_set<tagtree::TSID>& deleted);
 
-    void iter(const std::function<void(const common::TSID&)>& f);
+    void iter(const std::function<void(const tagtree::TSID&)>& f);
 
     // Used under lock.
     int size();

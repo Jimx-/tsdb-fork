@@ -16,7 +16,7 @@ extern const uint8_t TOMBSTONE_FORMAT;
 // NOTICE
 // boost::bind will still make a copy for reference
 void write_ts_helper(FILE* f, tsdbutil::EncBuf& enc_buf, base::CRC32& crc32,
-                     const common::TSID& tsid, const Intervals& itvs);
+                     const tagtree::TSID& tsid, const Intervals& itvs);
 
 bool write_tombstones(const std::string& dir, TombstoneReaderInterface* tr);
 

@@ -27,7 +27,7 @@ HeadIndexReader::get_all_postings()
 }
 
 bool HeadIndexReader::series(
-    const common::TSID& tsid,
+    const tagtree::TSID& tsid,
     std::vector<std::shared_ptr<chunk::ChunkMeta>>& chunks)
 {
     std::shared_ptr<MemSeries> s = head->series->get_by_id(tsid);

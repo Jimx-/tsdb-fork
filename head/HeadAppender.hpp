@@ -33,7 +33,7 @@ public:
           max_time(max_time)
     {}
 
-    error::Error add(const common::TSID& tsid, int64_t t, double v)
+    error::Error add(const tagtree::TSID& tsid, int64_t t, double v)
     {
         if (t < min_valid_time) return ErrOutOfBounds;
 

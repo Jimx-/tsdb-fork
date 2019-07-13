@@ -1,0 +1,6 @@
+[submodule "promql"]
+	path = promql
+	url = https://github.com/Jimx-/promql.git
+[submodule "tagtree"]
+	path = tagtree
+	url = https://github.com/Jimx-/tagtree.git

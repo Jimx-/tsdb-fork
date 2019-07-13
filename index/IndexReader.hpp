@@ -18,7 +18,7 @@ private:
     bool err_;
 
     // offset table
-    std::unordered_map<common::TSID, uint64_t> offset_table;
+    std::unordered_map<tagtree::TSID, uint64_t> offset_table;
 
 public:
     IndexReader(std::shared_ptr<tsdbutil::ByteSlice> b);
@@ -34,7 +34,7 @@ public:
 
     // Reference is the offset of Series entry / 16
     // lset and chunks supposed to be empty
-    bool series(const common::TSID& tsid,
+    bool series(const tagtree::TSID& tsid,
                 std::vector<std::shared_ptr<chunk::ChunkMeta>>& chunks);
 
     bool error();

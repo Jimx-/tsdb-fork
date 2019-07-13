@@ -12,7 +12,7 @@ namespace querier {
 ChainSeries::ChainSeries(const std::shared_ptr<Series>& series) : series(series)
 {}
 
-common::TSID ChainSeries::tsid() { return series->at(0)->tsid(); }
+tagtree::TSID ChainSeries::tsid() { return series->at(0)->tsid(); }
 
 std::unique_ptr<SeriesIteratorInterface> ChainSeries::iterator()
 {

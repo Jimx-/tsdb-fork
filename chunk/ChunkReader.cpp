@@ -40,7 +40,7 @@ bool ChunkReader::validate()
 
 // Will return EmptyChunk when error
 std::pair<std::shared_ptr<ChunkInterface>, bool>
-ChunkReader::chunk(const common::TSID&, uint64_t ref)
+ChunkReader::chunk(const tagtree::TSID&, uint64_t ref)
 {
     int seq = static_cast<int>(ref >> 32);
     int offset = static_cast<int>((ref << 32) >> 32);

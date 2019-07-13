@@ -19,7 +19,7 @@ public:
     ChunkSeries(const std::shared_ptr<ChunkSeriesMeta>& cm, int64_t min_time,
                 int64_t max_time);
 
-    common::TSID tsid();
+    tagtree::TSID tsid();
     std::unique_ptr<SeriesIteratorInterface> iterator();
 };
 

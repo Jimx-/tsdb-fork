@@ -36,7 +36,7 @@ bool MemIterator::next() const
 
 bool MemIterator::error() const { return iterator->error(); }
 
-MemSeries::MemSeries(const common::TSID& tsid, int64_t chunk_range)
+MemSeries::MemSeries(const tagtree::TSID& tsid, int64_t chunk_range)
     : mutex_(), tsid(tsid), chunk_range(chunk_range), first_chunk(0),
       next_at(std::numeric_limits<int64_t>::min()), pending_commit(false)
 {}
@@ -102,7 +102,7 @@ std::pair<bool, bool> MemSeries::append(int64_t timestamp, double value)
 std::shared_ptr<MemChunk> MemSeries::cut(int64_t timestamp)
 {
     chunks.emplace_back(new MemChunk(
-        std::hash<common::TSID>()(tsid),
+        std::hash<tagtree::TSID>()(tsid),
         std::shared_ptr<chunk::ChunkInterface>(new chunk::XORChunk()),
         timestamp, std::numeric_limits<int64_t>::min()));
 

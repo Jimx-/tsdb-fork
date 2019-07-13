@@ -19,7 +19,7 @@
 #include "block/IndexReaderInterface.hpp"
 #include "block/IndexWriterInterface.hpp"
 #include "chunk/ChunkMeta.hpp"
-#include "common/tsid.h"
+#include "tagtree/tsid.h"
 #include "index/IndexUtils.hpp"
 #include "index/PostingSet.hpp"
 #include "label/Label.hpp"
@@ -42,22 +42,22 @@ public:
 
 class Series {
 public:
-    common::TSID tsid;
+    tagtree::TSID tsid;
     std::vector<std::shared_ptr<chunk::ChunkMeta>> chunks;
 };
 
 class SeriesSamples {
     // This just represent one time series.
 public:
-    common::TSID tsid;
+    tagtree::TSID tsid;
     std::vector<std::vector<Sample>> chunks;
 
     SeriesSamples() = default;
-    SeriesSamples(const common::TSID& tsid,
+    SeriesSamples(const tagtree::TSID& tsid,
                   const std::vector<std::vector<Sample>>& chunks)
         : tsid(tsid), chunks(chunks)
     {}
-    SeriesSamples(const common::TSID& tsid) : tsid(tsid) {}
+    SeriesSamples(const tagtree::TSID& tsid) : tsid(tsid) {}
 
     bool operator==(const SeriesSamples& s) const
     {
@@ -77,9 +77,9 @@ void print_seriessamples(const SeriesSamples& s);
 
 class MockIndexReader : public block::IndexReaderInterface {
 public:
-    std::unordered_map<common::TSID, Series> series_;
+    std::unordered_map<tagtree::TSID, Series> series_;
 
-    std::pair<uint64_t, bool> get_posting(const common::TSID& tsid)
+    std::pair<uint64_t, bool> get_posting(const tagtree::TSID& tsid)
     {
         return {0, false};
     }
@@ -87,14 +87,14 @@ public:
     std::pair<std::unique_ptr<index::PostingsInterface>, bool>
     get_all_postings()
     {
-        std::unordered_set<common::TSID> s;
+        std::unordered_set<tagtree::TSID> s;
         for (auto&& p : series_) {
             s.insert(p.first);
         }
         return {std::make_unique<index::PostingSet>(s), true};
     }
 
-    bool series(const common::TSID& tsid,
+    bool series(const tagtree::TSID& tsid,
                 std::vector<std::shared_ptr<chunk::ChunkMeta>>& chunks)
     {
         if (series_.find(tsid) == series_.end()) return false;
@@ -118,7 +118,7 @@ public:
     }
 
     std::pair<std::shared_ptr<chunk::ChunkInterface>, bool>
-    chunk(const common::TSID& tsid, uint64_t ref)
+    chunk(const tagtree::TSID& tsid, uint64_t ref)
     {
         return {nullptr, false};
     }
@@ -131,7 +131,7 @@ class MockIndexWriter : public block::IndexWriterInterface {
 public:
     std::vector<SeriesSamples> series;
 
-    int add_series(const common::TSID& tsid,
+    int add_series(const tagtree::TSID& tsid,
                    const std::vector<std::shared_ptr<chunk::ChunkMeta>>& chunks)
     {
         int i = -1;

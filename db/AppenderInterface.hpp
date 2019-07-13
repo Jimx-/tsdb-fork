@@ -2,7 +2,7 @@
 #define APPENDERINTERFACE_H
 
 #include "base/Error.hpp"
-#include "common/tsid.h"
+#include "tagtree/tsid.h"
 #include "label/Label.hpp"
 
 #include <vector>
@@ -23,9 +23,9 @@ public:
     // to AddFast() at any point. Adding the sample via add() returns a new
     // reference number.
     // If the reference is 0 it must not be used for caching.
-    virtual error::Error add(const common::TSID& tsid, int64_t t, double v) = 0;
+    virtual error::Error add(const tagtree::TSID& tsid, int64_t t, double v) = 0;
     // Return a gorup id.
-    virtual error::Error add_group(const std::vector<common::TSID>& tsids,
+    virtual error::Error add_group(const std::vector<tagtree::TSID>& tsids,
                                    int64_t t, const std::vector<double>& v)
     {
         return error::Error();

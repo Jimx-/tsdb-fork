@@ -106,7 +106,7 @@ void Head::process_wal_samples(const std::vector<tsdbutil::RefSample>& samples,
                                base::WaitGroup* wg)
 {
     // Mitigate lock contention in StripeSeries::get_by_id().
-    std::unordered_map<common::TSID, std::shared_ptr<MemSeries>> series_map;
+    std::unordered_map<tagtree::TSID, std::shared_ptr<MemSeries>> series_map;
 
     int64_t mint = std::numeric_limits<int64_t>::max();
     int64_t maxt = std::numeric_limits<int64_t>::min();
@@ -192,7 +192,7 @@ wal::CorruptionError Head::load_wal(wal::SegmentReader* reader)
                 shards[i].clear();
 
             for (tsdbutil::RefSample& s : rsamples)
-                shards[std::hash<common::TSID>()(s.tsid) % partition_num]
+                shards[std::hash<tagtree::TSID>()(s.tsid) % partition_num]
                     .push_back(s);
 
             for (int i = 0; i < partition_num; ++i) {
@@ -234,8 +234,8 @@ wal::CorruptionError Head::load_wal(wal::SegmentReader* reader)
 
     error::Error err =
         all_stones.iter(static_cast<std::function<error::Error(
-                            const common::TSID&, const tombstone::Intervals&)>>(
-            [this](const common::TSID& tsid, const tombstone::Intervals& itv) {
+                            const tagtree::TSID&, const tombstone::Intervals&)>>(
+            [this](const tagtree::TSID& tsid, const tombstone::Intervals& itv) {
                 return this->chunk_rewrite(tsid, itv);
             }));
 
@@ -321,7 +321,7 @@ bool Head::init_time(int64_t t)
 //
 // In a word, this function is thread-safe.
 std::pair<std::shared_ptr<MemSeries>, bool>
-Head::get_or_create(const common::TSID& tsid)
+Head::get_or_create(const tagtree::TSID& tsid)
 {
     std::shared_ptr<MemSeries> s = series->get_by_id(tsid);
     if (s) return {s, false};
@@ -341,7 +341,7 @@ Head::get_or_create(const common::TSID& tsid)
 // chunkRewrite re-writes the chunks which overlaps with deleted ranges
 // and removes the samples in the deleted ranges.
 // Chunks is deleted if no samples are left at the end.
-error::Error Head::chunk_rewrite(const common::TSID& tsid,
+error::Error Head::chunk_rewrite(const tagtree::TSID& tsid,
                                  const tombstone::Intervals& dranges)
 {
     if (dranges.empty()) {
@@ -389,7 +389,7 @@ error::Error Head::chunk_rewrite(const common::TSID& tsid,
 // Head::chunk_rewrite()
 // WAL::log()
 error::Error Head::del(int64_t mint, int64_t maxt,
-                       const std::unordered_set<common::TSID>& tsids)
+                       const std::unordered_set<tagtree::TSID>& tsids)
 {
     // Do not delete anything beyond the currently valid range.
     std::pair<int64_t, int64_t> tp =
@@ -450,7 +450,7 @@ void Head::gc()
     // LOG_DEBUG << mint;
     // Drop old chunks and remember series IDs and hashes if they can be
     // deleted entirely.
-    std::pair<std::unordered_set<common::TSID>, int> rm_pair = series->gc(mint);
+    std::pair<std::unordered_set<tagtree::TSID>, int> rm_pair = series->gc(mint);
     if (rm_pair.first.size() == 0) {
         LOG_DEBUG << "head::gc() nothing to gc";
         return;
@@ -501,7 +501,7 @@ error::Error Head::truncate(int64_t mint)
     if (segs.first.second <= segs.first.first) return error::Error();
     std::pair<wal::CheckpointStats, error::Error> ckp = wal::checkpoint(
         wal.get(), segs.first.first, segs.first.second,
-        [this](const common::TSID& tsid) -> bool {
+        [this](const tagtree::TSID& tsid) -> bool {
             if (this->series->get_by_id(tsid))
                 return true;
             else

@@ -5,7 +5,7 @@
 #include <unordered_set>
 
 #include "base/Error.hpp"
-#include "common/tsid.h"
+#include "tagtree/tsid.h"
 #include "label/Label.hpp"
 #include "label/MatcherInterface.hpp"
 #include "querier/SeriesSetInterface.hpp"
@@ -17,7 +17,7 @@ class QuerierInterface {
 public:
     // Return nullptr when no series match.
     virtual std::shared_ptr<SeriesSetInterface>
-    select(const std::unordered_set<common::TSID>& l) const = 0;
+    select(const std::unordered_set<tagtree::TSID>& l) const = 0;
 
     virtual error::Error error() const = 0;
     virtual ~QuerierInterface() = default;

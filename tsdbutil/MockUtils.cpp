@@ -46,7 +46,7 @@ create_idx_chk_readers(std::deque<SeriesSamples>& tc)
             cr->chunks[ref++] = chunk;
             s.chunks.back()->chunk = chunk;
         }
-        ir->series_[common::TSID()] = s;
+        ir->series_[tagtree::TSID()] = s;
     }
 
     return std::make_tuple(std::shared_ptr<block::IndexReaderInterface>(ir),

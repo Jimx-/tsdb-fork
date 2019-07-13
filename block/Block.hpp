@@ -26,7 +26,7 @@ public:
                      const Block* b);
 
     std::pair<std::shared_ptr<chunk::ChunkInterface>, bool>
-    chunk(const common::TSID& tsid, uint64_t ref);
+    chunk(const tagtree::TSID& tsid, uint64_t ref);
 
     bool error();
 
@@ -51,7 +51,7 @@ public:
     std::pair<std::unique_ptr<index::PostingsInterface>, bool>
     get_all_postings();
 
-    bool series(const common::TSID& tsid,
+    bool series(const tagtree::TSID& tsid,
                 std::vector<std::shared_ptr<chunk::ChunkMeta>>& chunks);
 
     bool error();
@@ -75,14 +75,14 @@ public:
         const Block* b);
 
     // NOTICE, may throw std::out_of_range.
-    const tombstone::Intervals& get(const common::TSID& tsid) const;
+    const tombstone::Intervals& get(const tagtree::TSID& tsid) const;
 
     void iter(const IterFunc& f) const;
     error::Error iter(const ErrIterFunc& f) const;
 
     uint64_t total() const;
 
-    void add_interval(const common::TSID& tsid,
+    void add_interval(const tagtree::TSID& tsid,
                       const tombstone::Interval& itvl);
 
     ~BlockTombstoneReader();
@@ -159,7 +159,7 @@ public:
     std::pair<std::shared_ptr<tombstone::TombstoneReaderInterface>, bool>
     tombstones() const;
 
-    error::Error del(int64_t mint, int64_t maxt, const common::TSID& tsid);
+    error::Error del(int64_t mint, int64_t maxt, const tagtree::TSID& tsid);
 
     // clean_tombstones will remove the tombstones and rewrite the block (only
     // if there are any tombstones). If there was a rewrite, then it returns the

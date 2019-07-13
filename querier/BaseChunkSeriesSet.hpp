@@ -34,7 +34,7 @@ public:
         const std::shared_ptr<tombstone::TombstoneReaderInterface>& tr =
             std::shared_ptr<tombstone::TombstoneReaderInterface>(
                 new tombstone::MemTombstones()),
-        const std::unordered_set<common::TSID>& list = {});
+        const std::unordered_set<tagtree::TSID>& list = {});
 
     // next() always called before at().
     const std::shared_ptr<ChunkSeriesMeta>& at() const;

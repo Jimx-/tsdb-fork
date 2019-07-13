@@ -13,9 +13,9 @@ std::unique_ptr<PostingsInterface> MemPostings::all()
 }
 
 // Used under lock.
-void MemPostings::add(const common::TSID& tsid) { m.insert(tsid); }
+void MemPostings::add(const tagtree::TSID& tsid) { m.insert(tsid); }
 
-void MemPostings::del(const std::unordered_set<common::TSID>& deleted)
+void MemPostings::del(const std::unordered_set<tagtree::TSID>& deleted)
 {
     base::RWLockGuard mutex(mutex_, 1);
 
@@ -24,7 +24,7 @@ void MemPostings::del(const std::unordered_set<common::TSID>& deleted)
     }
 }
 
-void MemPostings::iter(const std::function<void(const common::TSID&)>& f)
+void MemPostings::iter(const std::function<void(const tagtree::TSID&)>& f)
 {
     base::RWLockGuard mutex(mutex_, 0);
     for (auto const& v_set : m) {

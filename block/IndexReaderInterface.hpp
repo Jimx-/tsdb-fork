@@ -32,7 +32,7 @@ public:
         return {nullptr, false};
     }
     virtual bool
-    series(const common::TSID& tsid,
+    series(const tagtree::TSID& tsid,
            std::vector<std::shared_ptr<chunk::ChunkMeta>>& chunks) = 0;
 
     virtual bool error() = 0;

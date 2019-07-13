@@ -89,7 +89,7 @@ error::Error delete_checkpoints(const std::string& dir, int max_index)
 // it with the original WAL.
 std::pair<CheckpointStats, error::Error>
 checkpoint(WAL* wal, int from, int to,
-           const std::function<bool(const common::TSID&)>& keep, int64_t mint)
+           const std::function<bool(const tagtree::TSID&)>& keep, int64_t mint)
 {
     CheckpointStats stats;
     std::deque<SegmentRange> seg_ranges;

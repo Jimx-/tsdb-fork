@@ -6,7 +6,7 @@ namespace index {
 // NOTICE!!!
 // Must be called based on existed deque/vector, cannot pass temporary
 // deque/vector into it
-PostingSet::PostingSet(const std::unordered_set<common::TSID>& set)
+PostingSet::PostingSet(const std::unordered_set<tagtree::TSID>& set)
     : elements(set.begin(), set.end()), index(-1)
 {
     begin = elements.cbegin();
@@ -19,7 +19,7 @@ bool PostingSet::next()
     return index < size;
 }
 
-bool PostingSet::seek(const common::TSID& v)
+bool PostingSet::seek(const tagtree::TSID& v)
 {
     auto it = std::find(begin, begin + size, v);
     if (it == elements.end()) {
@@ -29,7 +29,7 @@ bool PostingSet::seek(const common::TSID& v)
     return true;
 }
 
-common::TSID PostingSet::at() const { return *(begin + index); }
+tagtree::TSID PostingSet::at() const { return *(begin + index); }
 
 } // namespace index
 } // namespace tsdb

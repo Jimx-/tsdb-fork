@@ -10,20 +10,20 @@ namespace index {
 
 class PostingSet : public PostingsInterface {
 private:
-    std::vector<common::TSID> elements;
+    std::vector<tagtree::TSID> elements;
     std::vector
-    <common::TSID>::const_iterator begin;
+    <tagtree::TSID>::const_iterator begin;
     size_t index;
     size_t size;
 
 public:
-    PostingSet(const std::unordered_set<common::TSID>& set);
+    PostingSet(const std::unordered_set<tagtree::TSID>& set);
 
     bool next();
 
-    bool seek(const common::TSID& v);
+    bool seek(const tagtree::TSID& v);
 
-    common::TSID at() const;
+    tagtree::TSID at() const;
 };
 
 } // namespace index

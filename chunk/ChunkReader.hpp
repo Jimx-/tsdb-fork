@@ -29,7 +29,7 @@ public:
     bool validate();
 
     // Will return EmptyChunk when error
-    std::pair<std::shared_ptr<ChunkInterface>, bool> chunk(const common::TSID&,
+    std::pair<std::shared_ptr<ChunkInterface>, bool> chunk(const tagtree::TSID&,
                                                            uint64_t ref);
 
     bool error();

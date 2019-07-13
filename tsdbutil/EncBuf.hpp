@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "base/Endian.hpp"
-#include "common/tsid.h"
+#include "tagtree/tsid.h"
 
 namespace tsdb {
 namespace tsdbutil {
@@ -114,7 +114,7 @@ public:
         index += encoded;
     }
 
-    void put_tsid(const common::TSID& tsid)
+    void put_tsid(const tagtree::TSID& tsid)
     {
         std::string rep = tsid.to_string();
         int padding = index + rep.length() - b.size();

@@ -16,7 +16,7 @@ namespace head {
 // pointer dereferences.
 class StripeSeries {
 public:
-    std::vector<std::unordered_map<common::TSID, std::shared_ptr<MemSeries>>>
+    std::vector<std::unordered_map<tagtree::TSID, std::shared_ptr<MemSeries>>>
         series; // Index by TSID.
     std::vector<base::PadRWMutexLock>
         locks; // To align cache line (multiples of 64 bytes)
@@ -26,13 +26,13 @@ public:
     // gc garbage collects old chunks that are strictly before mint and removes
     // series entirely that have no chunks left. return <set of removed series,
     // number of removed chunks>
-    std::pair<std::unordered_set<common::TSID>, int> gc(int64_t min_time);
+    std::pair<std::unordered_set<tagtree::TSID>, int> gc(int64_t min_time);
 
-    std::shared_ptr<MemSeries> get_by_id(const common::TSID& tsid);
+    std::shared_ptr<MemSeries> get_by_id(const tagtree::TSID& tsid);
 
     // Return <MemSeries, if the series being set>.
     std::pair<std::shared_ptr<MemSeries>, bool>
-    get_or_set(const common::TSID& tsid, const std::shared_ptr<MemSeries>& s);
+    get_or_set(const tagtree::TSID& tsid, const std::shared_ptr<MemSeries>& s);
 };
 
 } // namespace head

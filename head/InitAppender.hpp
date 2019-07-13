@@ -16,7 +16,7 @@ private:
 public:
     InitAppender(Head* head) : head(head) {}
 
-    error::Error add(const common::TSID& tsid, int64_t t, double v)
+    error::Error add(const tagtree::TSID& tsid, int64_t t, double v)
     {
         if (app) return app->add(tsid, t, v);
         head->init_time(t);

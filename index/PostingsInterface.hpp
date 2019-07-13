@@ -1,7 +1,7 @@
 #ifndef POSTINGSINTERFACE_H
 #define POSTINGSINTERFACE_H
 
-#include "common/tsid.h"
+#include "tagtree/tsid.h"
 
 #include <algorithm>
 #include <deque>
@@ -59,15 +59,15 @@ template <typename T> void binary_insert(std::deque<T>* d, T v)
 class PostingsInterface {
 public:
     virtual bool next() = 0;
-    virtual bool seek(const common::TSID& v) = 0;
-    virtual common::TSID at() const = 0;
+    virtual bool seek(const tagtree::TSID& v) = 0;
+    virtual tagtree::TSID at() const = 0;
     virtual ~PostingsInterface() {}
 };
 
-inline std::vector<common::TSID>
+inline std::vector<tagtree::TSID>
 expand_postings(const std::shared_ptr<PostingsInterface>& p)
 {
-    std::vector<common::TSID> d;
+    std::vector<tagtree::TSID> d;
     while (p->next())
         d.push_back(p->at());
     return d;

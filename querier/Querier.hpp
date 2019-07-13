@@ -19,7 +19,7 @@ public:
     Querier(const std::vector<std::shared_ptr<QuerierInterface>>& queriers);
 
     std::shared_ptr<SeriesSetInterface>
-    select(const std::unordered_set<common::TSID>& l) const;
+    select(const std::unordered_set<tagtree::TSID>& l) const;
 
     error::Error error() const;
 };

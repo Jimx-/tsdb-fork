@@ -12,7 +12,7 @@ HeadChunkReader::HeadChunkReader(Head* head, int64_t min_time, int64_t max_time)
 {}
 
 std::pair<std::shared_ptr<chunk::ChunkInterface>, bool>
-HeadChunkReader::chunk(const common::TSID& tsid, uint64_t ref)
+HeadChunkReader::chunk(const tagtree::TSID& tsid, uint64_t ref)
 {
     std::shared_ptr<MemSeries> s = head->series->get_by_id(tsid);
     if (!s)

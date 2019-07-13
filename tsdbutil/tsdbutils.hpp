@@ -2,7 +2,7 @@
 #define FILEUTILS_H
 
 // #include "head/GroupMemSeries.hpp"
-#include "common/tsid.h"
+#include "tagtree/tsid.h"
 #include "head/MemSeries.hpp"
 #include "label/Label.hpp"
 #include "tombstone/Interval.hpp"
@@ -21,21 +21,21 @@ std::pair<int64_t, int64_t> clamp_interval(int64_t a, int64_t b, int64_t mint,
 
 class Stone {
 public:
-    common::TSID tsid;
+    tagtree::TSID tsid;
     tombstone::Intervals itvls;
 
     Stone() = default;
-    Stone(const common::TSID& tsid, const tombstone::Intervals& itvls)
+    Stone(const tagtree::TSID& tsid, const tombstone::Intervals& itvls)
         : tsid(tsid), itvls(itvls)
     {}
 };
 
 class RefSeries {
 public:
-    common::TSID tsid;
+    tagtree::TSID tsid;
 
     RefSeries() = default;
-    RefSeries(const common::TSID& tsid) : tsid(tsid) {}
+    RefSeries(const tagtree::TSID& tsid) : tsid(tsid) {}
 };
 
 // class RefGroupSeries{
@@ -56,17 +56,17 @@ public:
 // RefSample is a timestamp/value pair associated with a reference to a series.
 class RefSample {
 public:
-    common::TSID tsid;
+    tagtree::TSID tsid;
     int64_t t;
     double v;
     // TODO(Alec), decide whether to add MemSeries.
     std::shared_ptr<head::MemSeries> series;
 
     RefSample() = default;
-    RefSample(const common::TSID& tsid, int64_t t, double v)
+    RefSample(const tagtree::TSID& tsid, int64_t t, double v)
         : tsid(tsid), t(t), v(v)
     {}
-    RefSample(const common::TSID& tsid, int64_t t, double v,
+    RefSample(const tagtree::TSID& tsid, int64_t t, double v,
               const std::shared_ptr<head::MemSeries>& series)
         : tsid(tsid), t(t), v(v), series(series)
     {}

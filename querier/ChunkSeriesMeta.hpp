@@ -4,7 +4,7 @@
 #include <algorithm>
 
 #include "chunk/ChunkMeta.hpp"
-#include "common/tsid.h"
+#include "tagtree/tsid.h"
 #include "label/Label.hpp"
 #include "tombstone/Interval.hpp"
 
@@ -13,7 +13,7 @@ namespace querier {
 
 class ChunkSeriesMeta {
 public:
-    common::TSID tsid;
+    tagtree::TSID tsid;
     std::vector<std::shared_ptr<chunk::ChunkMeta>> chunks;
     tombstone::Intervals intervals;
 

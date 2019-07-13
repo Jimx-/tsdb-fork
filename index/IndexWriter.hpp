@@ -28,7 +28,7 @@ private:
     tsdbutil::CacheVector<uint32_t>
         uint32_cache; // For sorting when writing postings list
 
-    std::unordered_map<common::TSID, uint64_t> series; // Series offsets
+    std::unordered_map<tagtree::TSID, uint64_t> series; // Series offsets
 
     int version;
 
@@ -89,7 +89,7 @@ public:
     //
     // chunks here better to be sorted by time.
     int
-    add_series(const common::TSID& tsid,
+    add_series(const tagtree::TSID& tsid,
                const std::vector<std::shared_ptr<chunk::ChunkMeta>>& chunks);
 
     void write_offset_table();

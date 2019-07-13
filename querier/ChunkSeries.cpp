@@ -12,7 +12,7 @@ ChunkSeries::ChunkSeries(const std::shared_ptr<ChunkSeriesMeta>& cm,
     : cm(cm), min_time(min_time), max_time(max_time)
 {}
 
-common::TSID ChunkSeries::tsid() { return cm->tsid; }
+tagtree::TSID ChunkSeries::tsid() { return cm->tsid; }
 
 std::unique_ptr<SeriesIteratorInterface> ChunkSeries::iterator()
 {

@@ -60,7 +60,7 @@ void IndexReader::init()
 std::pair<std::unique_ptr<PostingsInterface>, bool>
 IndexReader::get_all_postings()
 {
-    std::unordered_set<common::TSID> all;
+    std::unordered_set<tagtree::TSID> all;
     for (auto&& p : offset_table) {
         all.insert(p.first);
     }
@@ -113,7 +113,7 @@ bool IndexReader::read_offset_table(uint64_t offset)
 
     // Read label name to offset of label value
     for (int i = 0; i < num_entries; i++) {
-        common::TSID tsid = dec_buf.get_tsid();
+        tagtree::TSID tsid = dec_buf.get_tsid();
         offset_table[tsid] = dec_buf.get_unsigned_variant();
     }
     if (dec_buf.err != tsdbutil::NO_ERR)
@@ -148,7 +148,7 @@ bool IndexReader::read_offset_table(uint64_t offset)
 // Reference is the offset of Series entry / 16
 // lset and chunks supposed to be empty
 bool IndexReader::series(
-    const common::TSID& tsid,
+    const tagtree::TSID& tsid,
     std ::vector<std::shared_ptr<chunk::ChunkMeta>>& chunks)
 {
     if (!b) return false;
