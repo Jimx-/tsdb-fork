@@ -64,8 +64,8 @@ set(LIBRARIES
     pthread
     atomic
     simple-web-server
-    promql
     tagtree
+    promql
     -Wl,--whole-archive
     Base
     Block
