@@ -232,9 +232,9 @@ wal::CorruptionError Head::load_wal(wal::SegmentReader* reader)
     }
     if (reader->error()) return reader->cerror();
 
-    error::Error err =
-        all_stones.iter(static_cast<std::function<error::Error(
-                            const tagtree::TSID&, const tombstone::Intervals&)>>(
+    error::Error err = all_stones.iter(
+        static_cast<std::function<error::Error(const tagtree::TSID&,
+                                               const tombstone::Intervals&)>>(
             [this](const tagtree::TSID& tsid, const tombstone::Intervals& itv) {
                 return this->chunk_rewrite(tsid, itv);
             }));
@@ -450,7 +450,8 @@ void Head::gc()
     // LOG_DEBUG << mint;
     // Drop old chunks and remember series IDs and hashes if they can be
     // deleted entirely.
-    std::pair<std::unordered_set<tagtree::TSID>, int> rm_pair = series->gc(mint);
+    std::pair<std::unordered_set<tagtree::TSID>, int> rm_pair =
+        series->gc(mint);
     if (rm_pair.first.size() == 0) {
         LOG_DEBUG << "head::gc() nothing to gc";
         return;

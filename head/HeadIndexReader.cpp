@@ -40,7 +40,10 @@ bool HeadIndexReader::series(
     int i = 0;
     for (auto const& chk : s->chunks) {
         // Do not expose chunks that are outside of the specified range.
-        if (!chk->overlap_closed(min_time, max_time)) continue;
+        if (!chk->overlap_closed(min_time, max_time)) {
+            i++;
+            continue;
+        }
         chunks.push_back(std::shared_ptr<chunk::ChunkMeta>(new chunk::ChunkMeta(
             s->chunk_id(i), chk->min_time, chk->max_time)));
         ++i;

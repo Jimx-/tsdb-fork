@@ -1,4 +1,5 @@
 #include "querier/PopulatedChunkSeriesSet.hpp"
+#include "base/Logging.hpp"
 
 namespace tsdb {
 namespace querier {

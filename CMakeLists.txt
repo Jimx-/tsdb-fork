@@ -34,6 +34,7 @@ include_directories(
     ${LIBUUID_INCLUDE_DIRS}
 )
 
+option(TAGTREE_USE_MONGODB "" ON)
 add_subdirectory(tagtree)
 include_directories(
     ${TAGTREE_INCLUDE_DIRS}
@@ -64,8 +65,8 @@ set(LIBRARIES
     pthread
     atomic
     simple-web-server
-    promql
     tagtree
+    promql
     -Wl,--whole-archive
     Base
     Block

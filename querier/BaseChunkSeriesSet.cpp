@@ -1,4 +1,5 @@
 #include "querier/BaseChunkSeriesSet.hpp"
+#include "base/Logging.hpp"
 #include "index/PostingSet.hpp"
 
 #include <unordered_set>

@@ -41,7 +41,7 @@ BlockQuerier::select(const std::unordered_set<tagtree::TSID>& l) const
         new BaseChunkSeriesSet(indexr, tombstones, l));
     if (base->error()) {
         // Happens when it cannot find the matching postings.
-        // LOG_ERROR << "Error get BaseChunkSeriesSet";
+        LOG_ERROR << "Error get BaseChunkSeriesSet";
         return nullptr;
     }
     return std::shared_ptr<SeriesSetInterface>(new BlockSeriesSet(
