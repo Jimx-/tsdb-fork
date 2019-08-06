@@ -7,9 +7,10 @@
 int main()
 {
     tsdb::db::DB db(tmpnam(nullptr));
-    tagtree::MongoDBSeriesManager msm;
+    tagtree::MongoDBSeriesManager msm(4096);
     tsdb::db::DBAdapter adapter(&db);
-    tagtree::prom::IndexedStorage indexed_storage("index.db", &adapter, &msm);
+    tagtree::prom::IndexedStorage indexed_storage("index.db", 4096, &adapter,
+                                                  &msm);
     promql::HttpServer prom_server(&indexed_storage);
 
     prom_server.start();
