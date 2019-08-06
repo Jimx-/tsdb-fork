@@ -41,7 +41,7 @@ void close_segment(std::shared_ptr<Segment> segment){
         << ", duration: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - t0).count() << "ms";
 }
 
-Segment::Segment(const std::string & dir, int index, bool write): dir_(dir), index_(index){
+Segment::Segment(const std::string & dir, int index, bool write): dir_(dir), index_(index), closed(true) {
     std::string name = segment_name(dir, index);
     if(write){
         f = fopen(name.c_str(), "ab");
@@ -74,9 +74,10 @@ Segment::Segment(const std::string & dir, int index, bool write): dir_(dir), ind
             return;
         }
     }
+    closed = false;
 }
 
-Segment::Segment(const std::string & filename){
+Segment::Segment(const std::string & filename): closed(true) {
     boost::filesystem::path p(filename);
     if(!tsdbutil::is_number(p.filename().string())){
         err_.set("invalid segment filename");
@@ -89,14 +90,16 @@ Segment::Segment(const std::string & filename){
         err_.set("Cannot open segment file: " + filename);
         return;
     }
+    closed = false;
 }
 
-Segment::Segment(const std::string & filename, const std::string & dir, int index): dir_(dir), index_(index){
+Segment::Segment(const std::string & filename, const std::string & dir, int index): dir_(dir), index_(index), closed(true) {
     f = fopen(filename.c_str(), "rb");
     if(!f){
         err_.set("Cannot open segment file: " + filename);
         return;
     }
+    closed = false;
 }
 
 bool compare_index(std::string & s1, std::string & s2){
