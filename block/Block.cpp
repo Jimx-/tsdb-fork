@@ -19,7 +19,7 @@ BlockChunkReader::BlockChunkReader(
 {}
 
 std::pair<std::shared_ptr<chunk::ChunkInterface>, bool>
-BlockChunkReader::chunk(const tagtree::TSID& tsid, uint64_t ref)
+BlockChunkReader::chunk(tagtree::TSID tsid, uint64_t ref)
 {
     return chunkr->chunk(tsid, ref);
 }
@@ -46,8 +46,7 @@ BlockIndexReader::get_all_postings()
 }
 
 bool BlockIndexReader::series(
-    const tagtree::TSID& tsid,
-    std::vector<std::shared_ptr<chunk::ChunkMeta>>& chunks)
+    tagtree::TSID tsid, std::vector<std::shared_ptr<chunk::ChunkMeta>>& chunks)
 {
     return indexr->series(tsid, chunks);
 }
@@ -70,8 +69,7 @@ BlockTombstoneReader::BlockTombstoneReader(
 {}
 
 // NOTICE, may throw std::out_of_range.
-const tombstone::Intervals&
-BlockTombstoneReader::get(const tagtree::TSID& tsid) const
+const tombstone::Intervals& BlockTombstoneReader::get(tagtree::TSID tsid) const
 {
     return tombstones->get(tsid);
 }
@@ -87,7 +85,7 @@ error::Error BlockTombstoneReader::iter(const ErrIterFunc& f) const
 
 uint64_t BlockTombstoneReader::total() const { return tombstones->total(); }
 
-void BlockTombstoneReader::add_interval(const tagtree::TSID& tsid,
+void BlockTombstoneReader::add_interval(tagtree::TSID tsid,
                                         const tombstone::Interval& itvl)
 {
     tombstones->add_interval(tsid, itvl);
@@ -262,7 +260,7 @@ Block::tombstones() const
     }
 }
 
-error::Error Block::del(int64_t mint, int64_t maxt, const tagtree::TSID& tsid)
+error::Error Block::del(int64_t mint, int64_t maxt, tagtree::TSID tsid)
 {
     base::RWLockGuard mutex(mutex_, 1);
     if (closing) return error::Error("error closing");
@@ -290,11 +288,11 @@ error::Error Block::del(int64_t mint, int64_t maxt, const tagtree::TSID& tsid)
         }
     }
 
-    tr->iter([&stones](const tagtree::TSID& tsid,
-                       const tombstone::Intervals& ivs) -> void {
-        for (const tombstone::Interval& iv : ivs)
-            stones->add_interval(tsid, iv);
-    });
+    tr->iter(
+        [&stones](tagtree::TSID tsid, const tombstone::Intervals& ivs) -> void {
+            for (const tombstone::Interval& iv : ivs)
+                stones->add_interval(tsid, iv);
+        });
     tr = stones;
     meta_.stats.num_tombstones = tr->total();
 
@@ -317,10 +315,10 @@ Block::clean_tombstones(const std::string& dest, void* compactor)
 {
     int num_tombstones = 0;
 
-    tr->iter([&num_tombstones](const tagtree::TSID& tsid,
-                               const tombstone::Intervals& ivs) {
-        num_tombstones += ivs.size();
-    });
+    tr->iter(
+        [&num_tombstones](tagtree::TSID tsid, const tombstone::Intervals& ivs) {
+            num_tombstones += ivs.size();
+        });
     if (num_tombstones == 0) return {ulid::ULID(), error::Error()};
 
     std::shared_ptr<BlockInterface> b(

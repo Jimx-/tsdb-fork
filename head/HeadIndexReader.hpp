@@ -21,7 +21,7 @@ public:
     std::pair<std::unique_ptr<index::PostingsInterface>, bool>
     get_all_postings();
 
-    bool series(const tagtree::TSID& tsid,
+    bool series(tagtree::TSID tsid,
                 std::vector<std::shared_ptr<chunk::ChunkMeta>>& chunks);
 
     bool error();

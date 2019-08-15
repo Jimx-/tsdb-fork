@@ -110,12 +110,12 @@ public:
     //
     // In a word, this function is thread-safe.
     std::pair<std::shared_ptr<MemSeries>, bool>
-    get_or_create(const tagtree::TSID& tsid);
+    get_or_create(tagtree::TSID tsid);
 
     // chunkRewrite re-writes the chunks which overlaps with deleted ranges
     // and removes the samples in the deleted ranges.
     // Chunks is deleted if no samples are left at the end.
-    error::Error chunk_rewrite(const tagtree::TSID& tsid,
+    error::Error chunk_rewrite(tagtree::TSID tsid,
                                const tombstone::Intervals& dranges);
 
     // del all samples in the range of [mint, maxt] for series that satisfy the

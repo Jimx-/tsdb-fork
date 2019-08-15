@@ -89,7 +89,7 @@ public:
     //
     // chunks here better to be sorted by time.
     int
-    add_series(const tagtree::TSID& tsid,
+    add_series(tagtree::TSID tsid,
                const std::vector<std::shared_ptr<chunk::ChunkMeta>>& chunks);
 
     void write_offset_table();

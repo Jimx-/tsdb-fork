@@ -150,16 +150,13 @@ public:
     tagtree::TSID get_tsid()
     {
         if (err != NO_ERR) return 0;
-        if (index + 36 >= size) {
+        if (size - index < 8) {
             err = ERR_INVALID_SIZE;
             return 0;
         }
-
-        std::string rep(reinterpret_cast<const char*>(b) + index, 36);
-        tagtree::TSID r(rep);
-
-        index += 36;
-        return r;
+        uint64_t r = base::get_uint64_big_endian(b + index);
+        index += 8;
+        return (tagtree::TSID)r;
     }
 };
 

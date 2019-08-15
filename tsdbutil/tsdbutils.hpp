@@ -25,7 +25,7 @@ public:
     tombstone::Intervals itvls;
 
     Stone() = default;
-    Stone(const tagtree::TSID& tsid, const tombstone::Intervals& itvls)
+    Stone(tagtree::TSID tsid, const tombstone::Intervals& itvls)
         : tsid(tsid), itvls(itvls)
     {}
 };
@@ -35,7 +35,7 @@ public:
     tagtree::TSID tsid;
 
     RefSeries() = default;
-    RefSeries(const tagtree::TSID& tsid) : tsid(tsid) {}
+    RefSeries(tagtree::TSID tsid) : tsid(tsid) {}
 };
 
 // class RefGroupSeries{
@@ -63,10 +63,10 @@ public:
     std::shared_ptr<head::MemSeries> series;
 
     RefSample() = default;
-    RefSample(const tagtree::TSID& tsid, int64_t t, double v)
+    RefSample(tagtree::TSID tsid, int64_t t, double v)
         : tsid(tsid), t(t), v(v)
     {}
-    RefSample(const tagtree::TSID& tsid, int64_t t, double v,
+    RefSample(tagtree::TSID tsid, int64_t t, double v,
               const std::shared_ptr<head::MemSeries>& series)
         : tsid(tsid), t(t), v(v), series(series)
     {}

@@ -27,12 +27,12 @@ HeadIndexReader::get_all_postings()
 }
 
 bool HeadIndexReader::series(
-    const tagtree::TSID& tsid,
+    tagtree::TSID tsid,
     std::vector<std::shared_ptr<chunk::ChunkMeta>>& chunks)
 {
     std::shared_ptr<MemSeries> s = head->series->get_by_id(tsid);
     if (!s) {
-        LOG_ERROR << "not existed, series id: " << tsid.to_string();
+        LOG_ERROR << "not existed, series id: " << tsid;
         return false;
     }
 

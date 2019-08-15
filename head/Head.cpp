@@ -233,9 +233,9 @@ wal::CorruptionError Head::load_wal(wal::SegmentReader* reader)
     if (reader->error()) return reader->cerror();
 
     error::Error err = all_stones.iter(
-        static_cast<std::function<error::Error(const tagtree::TSID&,
+        static_cast<std::function<error::Error(tagtree::TSID,
                                                const tombstone::Intervals&)>>(
-            [this](const tagtree::TSID& tsid, const tombstone::Intervals& itv) {
+            [this](tagtree::TSID tsid, const tombstone::Intervals& itv) {
                 return this->chunk_rewrite(tsid, itv);
             }));
 
@@ -321,7 +321,7 @@ bool Head::init_time(int64_t t)
 //
 // In a word, this function is thread-safe.
 std::pair<std::shared_ptr<MemSeries>, bool>
-Head::get_or_create(const tagtree::TSID& tsid)
+Head::get_or_create(tagtree::TSID tsid)
 {
     std::shared_ptr<MemSeries> s = series->get_by_id(tsid);
     if (s) return {s, false};
@@ -341,7 +341,7 @@ Head::get_or_create(const tagtree::TSID& tsid)
 // chunkRewrite re-writes the chunks which overlaps with deleted ranges
 // and removes the samples in the deleted ranges.
 // Chunks is deleted if no samples are left at the end.
-error::Error Head::chunk_rewrite(const tagtree::TSID& tsid,
+error::Error Head::chunk_rewrite(tagtree::TSID tsid,
                                  const tombstone::Intervals& dranges)
 {
     if (dranges.empty()) {
@@ -408,7 +408,7 @@ error::Error Head::del(int64_t mint, int64_t maxt,
         std::shared_ptr<MemSeries> s = series->get_by_id(p);
         if (!s)
             return error::Error("error StripeSeries::get_by_id " +
-                                p.to_string());
+                                std::to_string(p));
 
         int64_t t0 = s->min_time();
         int64_t t1 = s->max_time();
@@ -502,7 +502,7 @@ error::Error Head::truncate(int64_t mint)
     if (segs.first.second <= segs.first.first) return error::Error();
     std::pair<wal::CheckpointStats, error::Error> ckp = wal::checkpoint(
         wal.get(), segs.first.first, segs.first.second,
-        [this](const tagtree::TSID& tsid) -> bool {
+        [this](tagtree::TSID tsid) -> bool {
             if (this->series->get_by_id(tsid))
                 return true;
             else

@@ -53,11 +53,11 @@ public:
     std::vector<std::vector<Sample>> chunks;
 
     SeriesSamples() = default;
-    SeriesSamples(const tagtree::TSID& tsid,
+    SeriesSamples(tagtree::TSID tsid,
                   const std::vector<std::vector<Sample>>& chunks)
         : tsid(tsid), chunks(chunks)
     {}
-    SeriesSamples(const tagtree::TSID& tsid) : tsid(tsid) {}
+    SeriesSamples(tagtree::TSID tsid) : tsid(tsid) {}
 
     bool operator==(const SeriesSamples& s) const
     {
@@ -79,7 +79,7 @@ class MockIndexReader : public block::IndexReaderInterface {
 public:
     std::unordered_map<tagtree::TSID, Series> series_;
 
-    std::pair<uint64_t, bool> get_posting(const tagtree::TSID& tsid)
+    std::pair<uint64_t, bool> get_posting(tagtree::TSID tsid)
     {
         return {0, false};
     }
@@ -94,7 +94,7 @@ public:
         return {std::make_unique<index::PostingSet>(s), true};
     }
 
-    bool series(const tagtree::TSID& tsid,
+    bool series(tagtree::TSID tsid,
                 std::vector<std::shared_ptr<chunk::ChunkMeta>>& chunks)
     {
         if (series_.find(tsid) == series_.end()) return false;
@@ -118,7 +118,7 @@ public:
     }
 
     std::pair<std::shared_ptr<chunk::ChunkInterface>, bool>
-    chunk(const tagtree::TSID& tsid, uint64_t ref)
+    chunk(tagtree::TSID tsid, uint64_t ref)
     {
         return {nullptr, false};
     }
@@ -131,7 +131,7 @@ class MockIndexWriter : public block::IndexWriterInterface {
 public:
     std::vector<SeriesSamples> series;
 
-    int add_series(const tagtree::TSID& tsid,
+    int add_series(tagtree::TSID tsid,
                    const std::vector<std::shared_ptr<chunk::ChunkMeta>>& chunks)
     {
         int i = -1;

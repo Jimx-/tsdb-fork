@@ -12,7 +12,7 @@ class AppenderAdapter : public tagtree::Appender {
 public:
     AppenderAdapter(std::shared_ptr<AppenderInterface> app) : app(app) {}
 
-    virtual void add(const tagtree::TSID& tsid, uint64_t t, double v)
+    virtual void add(tagtree::TSID tsid, uint64_t t, double v)
     {
         app->add(tsid, t, v);
     }

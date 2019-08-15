@@ -12,19 +12,19 @@ namespace tombstone {
 
 class TombstoneReaderInterface {
 public:
-    typedef std::function<void(const tagtree::TSID&, const Intervals&)> IterFunc;
-    typedef std::function<error::Error(const tagtree::TSID&, const Intervals&)>
+    typedef std::function<void(tagtree::TSID, const Intervals&)> IterFunc;
+    typedef std::function<error::Error(tagtree::TSID, const Intervals&)>
         ErrIterFunc;
 
     // NOTICE, may throw std::out_of_range.
-    virtual const Intervals& get(const tagtree::TSID& tsid) const = 0;
+    virtual const Intervals& get(tagtree::TSID tsid) const = 0;
     virtual void iter(const IterFunc& f) const = 0;
     virtual error::Error iter(const ErrIterFunc& f) const = 0;
 
     // Number of Interval
     virtual uint64_t total() const = 0;
 
-    virtual void add_interval(const tagtree::TSID&, const Interval& itvl){};
+    virtual void add_interval(tagtree::TSID, const Interval& itvl){};
 
     virtual ~TombstoneReaderInterface() = default;
 };

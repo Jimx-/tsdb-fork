@@ -148,7 +148,7 @@ bool IndexReader::read_offset_table(uint64_t offset)
 // Reference is the offset of Series entry / 16
 // lset and chunks supposed to be empty
 bool IndexReader::series(
-    const tagtree::TSID& tsid,
+    tagtree::TSID tsid,
     std ::vector<std::shared_ptr<chunk::ChunkMeta>>& chunks)
 {
     if (!b) return false;

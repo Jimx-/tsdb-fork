@@ -20,25 +20,15 @@ else()
     link_directories(${Boost_LIBRARY_DIRS})
 endif (NOT Boost_FOUND)
 
-# Find libuuid
-find_package(Libuuid REQUIRED)
-if (NOT LIBUUID_FOUND)
-   message(FATAL_ERROR "You might need to install libuuid first")
-endif()
-
 add_subdirectory(promql)
 
 include_directories(
     ${TOPDIR}
     ${TOPDIR}/promql/include
-    ${LIBUUID_INCLUDE_DIRS}
+    ${TOPDIR}/tagtree/include
 )
 
-option(TAGTREE_USE_MONGODB "" ON)
 add_subdirectory(tagtree)
-include_directories(
-    ${TAGTREE_INCLUDE_DIRS}
-)
 
 set(SOURCE_FILES
     main.cpp)
@@ -85,7 +75,6 @@ set(LIBRARIES
     ${Boost_IOSTREAMS_LIBRARY}
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}
-    ${LIBUUID_LIBRARY}
 )
  
 add_executable(tsdb ${SOURCE_FILES} ${HEADER_FILES} ${EXT_SOURCE_FILES})

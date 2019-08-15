@@ -19,7 +19,7 @@ bool PostingSet::next()
     return index < size;
 }
 
-bool PostingSet::seek(const tagtree::TSID& v)
+bool PostingSet::seek(tagtree::TSID v)
 {
     auto it = std::find(begin, begin + size, v);
     if (it == elements.end()) {

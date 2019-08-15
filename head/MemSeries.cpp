@@ -36,7 +36,7 @@ bool MemIterator::next() const
 
 bool MemIterator::error() const { return iterator->error(); }
 
-MemSeries::MemSeries(const tagtree::TSID& tsid, int64_t chunk_range)
+MemSeries::MemSeries(tagtree::TSID tsid, int64_t chunk_range)
     : mutex_(), tsid(tsid), chunk_range(chunk_range), first_chunk(0),
       next_at(std::numeric_limits<int64_t>::min()), pending_commit(false)
 {}

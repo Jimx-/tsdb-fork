@@ -28,11 +28,11 @@ public:
     // number of removed chunks>
     std::pair<std::unordered_set<tagtree::TSID>, int> gc(int64_t min_time);
 
-    std::shared_ptr<MemSeries> get_by_id(const tagtree::TSID& tsid);
+    std::shared_ptr<MemSeries> get_by_id(tagtree::TSID tsid);
 
     // Return <MemSeries, if the series being set>.
     std::pair<std::shared_ptr<MemSeries>, bool>
-    get_or_set(const tagtree::TSID& tsid, const std::shared_ptr<MemSeries>& s);
+    get_or_set(tagtree::TSID tsid, const std::shared_ptr<MemSeries>& s);
 };
 
 } // namespace head

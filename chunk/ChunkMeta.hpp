@@ -25,7 +25,7 @@ public:
     ChunkMeta(uint64_t ref, int64_t min_time, int64_t max_time)
         : ref(ref), min_time(min_time), max_time(max_time)
     {}
-    ChunkMeta(uint64_t ref, const tagtree::TSID& tsid, int64_t min_time,
+    ChunkMeta(uint64_t ref, tagtree::TSID tsid, int64_t min_time,
               int64_t max_time)
         : ref(ref), tsid(tsid), min_time(min_time), max_time(max_time)
     {}
@@ -33,7 +33,7 @@ public:
               int64_t min_time, int64_t max_time)
         : ref(ref), chunk(chunk), min_time(min_time), max_time(max_time)
     {}
-    ChunkMeta(uint64_t ref, const tagtree::TSID& tsid,
+    ChunkMeta(uint64_t ref, tagtree::TSID tsid,
               const std::shared_ptr<ChunkInterface>& chunk, int64_t min_time,
               int64_t max_time)
         : ref(ref), tsid(tsid), chunk(chunk), min_time(min_time),

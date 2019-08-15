@@ -32,11 +32,11 @@ public:
     std::unique_ptr<PostingsInterface> all();
 
     // Used under lock.
-    void add(const tagtree::TSID& tsid);
+    void add(tagtree::TSID tsid);
 
     void del(const std::unordered_set<tagtree::TSID>& deleted);
 
-    void iter(const std::function<void(const tagtree::TSID&)>& f);
+    void iter(const std::function<void(tagtree::TSID)>& f);
 
     // Used under lock.
     int size();

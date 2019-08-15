@@ -18,7 +18,7 @@ const uint8_t TOMBSTONE_FORMAT = 1;
 // NOTICE
 // boost::bind will still make a copy for reference
 void write_ts_helper(FILE* f, tsdbutil::EncBuf& enc_buf, base::CRC32& crc32,
-                     const tagtree::TSID& tsid, const Intervals& itvs)
+                     tagtree::TSID tsid, const Intervals& itvs)
 {
     for (const Interval& itvl : itvs) {
         enc_buf.put_tsid(tsid);
@@ -49,7 +49,7 @@ bool write_tombstones(const std::string& dir, TombstoneReaderInterface* tr)
 
     // Iterate writing.
     if (tr != NULL)
-        tr->iter([f, &enc_buf, &crc32](const tagtree::TSID& tsid,
+        tr->iter([f, &enc_buf, &crc32](tagtree::TSID tsid,
                                        const Intervals& itv) {
             write_ts_helper(f, enc_buf, crc32, tsid, itv);
         });
@@ -85,7 +85,7 @@ bool write_tombstones(const std::string& dir,
 
     // Iterate writing.
     tr->iter(
-        [&enc_buf, &crc32, f](const tagtree::TSID& tsid, const Intervals& itv) {
+        [&enc_buf, &crc32, f](tagtree::TSID tsid, const Intervals& itv) {
             write_ts_helper(f, enc_buf, crc32, tsid, itv);
         });
 

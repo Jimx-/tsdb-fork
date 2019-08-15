@@ -17,7 +17,7 @@ class IndexWriterInterface {
 public:
     // 0 succeed, -1 error
     virtual int add_series(
-        const tagtree::TSID& tsid,
+        tagtree::TSID tsid,
         const std::vector<std::shared_ptr<chunk::ChunkMeta>>& chunks) = 0;
 
     virtual ~IndexWriterInterface() {}

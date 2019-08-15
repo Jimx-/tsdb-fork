@@ -59,7 +59,7 @@ template <typename T> void binary_insert(std::deque<T>* d, T v)
 class PostingsInterface {
 public:
     virtual bool next() = 0;
-    virtual bool seek(const tagtree::TSID& v) = 0;
+    virtual bool seek(tagtree::TSID v) = 0;
     virtual tagtree::TSID at() const = 0;
     virtual ~PostingsInterface() {}
 };

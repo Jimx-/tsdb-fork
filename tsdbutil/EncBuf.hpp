@@ -114,15 +114,13 @@ public:
         index += encoded;
     }
 
-    void put_tsid(const tagtree::TSID& tsid)
+    void put_tsid(tagtree::TSID tsid)
     {
-        std::string rep = tsid.to_string();
-        int padding = index + rep.length() - b.size();
+        int padding = index + 8 - b.size();
         for (int i = 0; i < padding; i++)
             b.push_back(0);
-        for (auto&& c : rep) {
-            b[index++] = (uint8_t)c;
-        }
+        base::put_uint64_big_endian(&(b[index]), (uint64_t)tsid);
+        index += 8;
     }
 };
 

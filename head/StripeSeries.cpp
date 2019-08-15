@@ -65,7 +65,7 @@ StripeSeries::gc(int64_t min_time)
     return {rm_series, rm_chunks};
 }
 
-std::shared_ptr<MemSeries> StripeSeries::get_by_id(const tagtree::TSID& tsid)
+std::shared_ptr<MemSeries> StripeSeries::get_by_id(tagtree::TSID tsid)
 {
     uint64_t i = std::hash<tagtree::TSID>()(tsid) & STRIPE_MASK;
     std::unordered_map<tagtree::TSID, std::shared_ptr<MemSeries>>::iterator r;
@@ -78,7 +78,7 @@ std::shared_ptr<MemSeries> StripeSeries::get_by_id(const tagtree::TSID& tsid)
 
 // Return <MemSeries, if the series being set>.
 std::pair<std::shared_ptr<MemSeries>, bool>
-StripeSeries::get_or_set(const tagtree::TSID& tsid,
+StripeSeries::get_or_set(tagtree::TSID tsid,
                          const std::shared_ptr<MemSeries>& s)
 {
     uint64_t i = std::hash<tagtree::TSID>()(tsid) & STRIPE_MASK;

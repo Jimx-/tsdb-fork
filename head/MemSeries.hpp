@@ -44,7 +44,7 @@ public:
     bool pending_commit;
     std::unique_ptr<chunk::ChunkAppenderInterface> appender;
 
-    MemSeries(const tagtree::TSID& tsid, int64_t chunk_range);
+    MemSeries(tagtree::TSID tsid, int64_t chunk_range);
 
     int64_t min_time();
     int64_t max_time();

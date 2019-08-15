@@ -17,7 +17,7 @@ public:
     mutable base::RWMutexLock mutex_;
 
     // NOTICE, may throw std::out_of_range.
-    const Intervals& get(const tagtree::TSID& tsid) const
+    const Intervals& get(tagtree::TSID tsid) const
     {
         base::RWLockGuard mutex(mutex_, false);
         return interval_groups.at(tsid);
@@ -48,7 +48,7 @@ public:
         return r;
     }
 
-    void add_interval(const tagtree::TSID& tsid, const Interval& itvl)
+    void add_interval(tagtree::TSID tsid, const Interval& itvl)
     {
         base::RWLockGuard mutex(mutex_, true);
         itvls_add(interval_groups[tsid], itvl);

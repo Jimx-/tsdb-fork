@@ -25,7 +25,7 @@ bool CompactionChunkSeriesSet::next() const
     }
 
     if (!ir->series(p->at(), csm->chunks)) {
-        err_.wrap("Error get series " + p->at().to_string());
+        err_.wrap("Error get series " + std::to_string(p->at()));
         // LOG_DEBUG << "next err: " << err_.error();
         return false;
     }

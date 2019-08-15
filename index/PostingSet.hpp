@@ -21,7 +21,7 @@ public:
 
     bool next();
 
-    bool seek(const tagtree::TSID& v);
+    bool seek(tagtree::TSID v);
 
     tagtree::TSID at() const;
 };
