@@ -54,9 +54,14 @@ public:
     QuerierAdapter(std::unique_ptr<QuerierInterface>&& q) : q(std::move(q)) {}
 
     virtual std::shared_ptr<tagtree::SeriesSet>
-    select(const std::unordered_set<tagtree::TSID>& tsids)
+    select(const tagtree::MemPostingList& tsids)
     {
-        return std::make_shared<SeriesSetAdapter>(q->select(tsids));
+        std::unordered_set<tagtree::TSID> tsid_set;
+        for (auto it = tsids.begin(); it != tsids.end(); it++) {
+            tsid_set.insert(*it);
+        }
+
+        return std::make_shared<SeriesSetAdapter>(q->select(tsid_set));
     }
 
 private:
