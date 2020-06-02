@@ -72,14 +72,17 @@ int main(){
 ## Dependency
 Boost 1.67 (Older version may be okay).
 
-## Test & Example
-For the example of each component, you can check the files in test/ folder.  
-To build the unit test, googletest and googlemock are required.
+## Build & Test
+To build the TSDB, run
 ```
-$ cd test
 $ mkdir build && cd build
 $ cmake .. && make
+$ ln -s ../promql/static
+$ ln -s ../promql/templates
+$ ./tsdb
 ```
+and navigate to <http://localhost:9090/graph> for the web UI.
+
 NOTE: some test files not contained in test/CMakeLists.txt may be outdated.
 
 ## Benchmark
