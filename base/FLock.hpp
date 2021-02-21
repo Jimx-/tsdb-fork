@@ -23,7 +23,7 @@ public:
 
     FLock(const std::string& filename) : fd(-1), released(true)
     {
-        if ((fd = open(filename.c_str(), O_WRONLY | O_CREAT)) == -1) {
+        if ((fd = open(filename.c_str(), O_WRONLY | O_CREAT, 0644)) == -1) {
             err_.set("cannot open lock file " + filename);
             return;
         }

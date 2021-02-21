@@ -1,3 +1,6 @@
+#include "db/DB.hpp"
+#include "db/DBAdapter.hpp"
+
 #include "insert_data_loader.h"
 #include "mixed_data_loader.h"
 #include "null_storage.h"
@@ -8,8 +11,10 @@
 #include "cxxopts.hpp"
 
 #include <chrono>
+#include <filesystem>
 #include <iostream>
 typedef std::chrono::high_resolution_clock Clock;
+namespace fs = std::filesystem;
 
 using cxxopts::OptionException;
 
@@ -118,10 +123,24 @@ int main(int argc, char* argv[])
     // std::string dir = "./s1d-i1h-20000-2";
     // std::string dir = "./s1d-i10m-10000-2";
 
+    fs::path root_path(dir);
+
+    tagtree::Storage* storage = nullptr;
+
+    tsdb::db::DB db(root_path.string());
+    tsdb::db::DBAdapter adapter(&db);
+    fs::path index_path = root_path / "index";
+    fs::path series_path = index_path / "series";
+
+    fs::create_directory(index_path);
+
     NullStorage null_storage;
-    tagtree::SeriesFileManager sfm(cache_size, dir + "/series", 50000);
-    tagtree::prom::IndexedStorage indexed_storage(dir, 4096, &null_storage,
-                                                  &sfm, bitmap_only);
+
+    storage = &adapter;
+
+    tagtree::SeriesFileManager sfm(cache_size, series_path.string(), 50000);
+    tagtree::prom::IndexedStorage indexed_storage(index_path.string(), 4096,
+                                                  storage, &sfm, bitmap_only);
 
     if (workload == "insert") {
         std::string data_dir;
