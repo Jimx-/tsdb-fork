@@ -21,11 +21,13 @@ else()
 endif (NOT Boost_FOUND)
 
 add_subdirectory(promql)
+add_subdirectory(cxxopts)
 
 include_directories(
     ${TOPDIR}
     ${TOPDIR}/promql/include
     ${TOPDIR}/tagtree/include
+    ${TOPDIR}/cxxopts/include    
 )
 
 add_subdirectory(tagtree)
@@ -79,3 +81,6 @@ set(LIBRARIES
  
 add_executable(tsdb ${SOURCE_FILES} ${HEADER_FILES} ${EXT_SOURCE_FILES})
 target_link_libraries(tsdb ${LIBRARIES}) 
+
+add_executable(tsbs tsbs.cpp base_data_loader.cpp insert_data_loader.cpp genzipf.c mixed_data_loader.cpp)
+target_link_libraries(tsbs ${LIBRARIES})

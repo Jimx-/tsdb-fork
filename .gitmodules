@@ -4,3 +4,6 @@
 [submodule "tagtree"]
 	path = tagtree
 	url = https://github.com/Jimx-/tagtree.git
+[submodule "cxxopts"]
+	path = cxxopts
+	url = https://github.com/jarro2783/cxxopts.git
