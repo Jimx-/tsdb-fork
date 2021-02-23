@@ -56,7 +56,7 @@ public:
     virtual std::shared_ptr<tagtree::SeriesSet>
     select(const tagtree::MemPostingList& tsids)
     {
-        std::unordered_set<tagtree::TSID> tsid_set;
+        std::set<tagtree::TSID> tsid_set;
         for (auto it = tsids.begin(); it != tsids.end(); it++) {
             tsid_set.insert(*it);
         }
@@ -72,4 +72,3 @@ private:
 } // namespace tsdb
 
 #endif
-

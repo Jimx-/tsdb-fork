@@ -24,7 +24,7 @@ public:
                  int64_t min_time, int64_t max_time);
 
     std::shared_ptr<SeriesSetInterface>
-    select(const std::unordered_set<tagtree::TSID>& l) const;
+    select(const std::set<tagtree::TSID>& l) const;
 
     std::deque<std::string> label_values(const std::string& s) const;
 

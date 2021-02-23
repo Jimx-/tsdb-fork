@@ -13,7 +13,11 @@ std::unique_ptr<PostingsInterface> MemPostings::all()
 }
 
 // Used under lock.
-void MemPostings::add(tagtree::TSID tsid) { m.insert(tsid); }
+void MemPostings::add(tagtree::TSID tsid)
+{
+    base::RWLockGuard mutex(mutex_, 1);
+    m.insert(tsid);
+}
 
 void MemPostings::del(const std::unordered_set<tagtree::TSID>& deleted)
 {

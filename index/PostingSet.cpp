@@ -6,7 +6,7 @@ namespace index {
 // NOTICE!!!
 // Must be called based on existed deque/vector, cannot pass temporary
 // deque/vector into it
-PostingSet::PostingSet(const std::unordered_set<tagtree::TSID>& set)
+PostingSet::PostingSet(const std::set<tagtree::TSID>& set)
     : elements(set.begin(), set.end()), index(-1)
 {
     begin = elements.cbegin();

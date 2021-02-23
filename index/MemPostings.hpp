@@ -4,9 +4,9 @@
 #include "base/Mutex.hpp"
 #include "base/ThreadPool.hpp"
 #include "base/WaitGroup.hpp"
-#include "tagtree/tsid.h"
 #include "index/PostingSet.hpp"
 #include "label/Label.hpp"
+#include "tagtree/tsid.h"
 
 #include <cstdint>
 #include <deque>
@@ -22,7 +22,7 @@ namespace index {
 class MemPostings {
 private:
     base::RWMutexLock mutex_;
-    std::unordered_set<tagtree::TSID> m;
+    std::set<tagtree::TSID> m;
     bool ordered;
     base::WaitGroup wg;
 

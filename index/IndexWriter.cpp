@@ -116,7 +116,7 @@ int IndexWriter::add_series(
     if (ensure_stage(IDX_STAGE_SERIES) == -1) return INVALID_STAGE;
 
     if (series.find(tsid) != series.end()) {
-        LOG_ERROR << "Labels already added";
+        LOG_ERROR << "Labels already added " << tsid;
         return EXISTED;
     }
 

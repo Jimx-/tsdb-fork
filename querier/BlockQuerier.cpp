@@ -35,7 +35,7 @@ BlockQuerier::BlockQuerier(const std::shared_ptr<block::BlockInterface>& block,
 }
 
 std::shared_ptr<SeriesSetInterface>
-BlockQuerier::select(const std::unordered_set<tagtree::TSID>& l) const
+BlockQuerier::select(const std::set<tagtree::TSID>& l) const
 {
     std::shared_ptr<ChunkSeriesSetInterface> base(
         new BaseChunkSeriesSet(indexr, tombstones, l));

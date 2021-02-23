@@ -19,10 +19,10 @@
 #include "block/IndexReaderInterface.hpp"
 #include "block/IndexWriterInterface.hpp"
 #include "chunk/ChunkMeta.hpp"
-#include "tagtree/tsid.h"
 #include "index/IndexUtils.hpp"
 #include "index/PostingSet.hpp"
 #include "label/Label.hpp"
+#include "tagtree/tsid.h"
 #include "tombstone/MemTombstones.hpp"
 #include "tsdbutil/ListStringTuples.hpp"
 
@@ -87,7 +87,7 @@ public:
     std::pair<std::unique_ptr<index::PostingsInterface>, bool>
     get_all_postings()
     {
-        std::unordered_set<tagtree::TSID> s;
+        std::set<tagtree::TSID> s;
         for (auto&& p : series_) {
             s.insert(p.first);
         }

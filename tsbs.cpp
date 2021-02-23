@@ -81,7 +81,7 @@ void bench_query(tagtree::prom::IndexedStorage& storage, int query_type)
 
     for (int i = 0; i < 100; i++) {
         auto t1 = Clock::now();
-        auto q = storage.querier(0, UINT64_MAX);
+        auto q = storage.querier(0, INT64_MAX);
         auto ss = q->select(queries[query_type - 1]);
 
         int count = 0;
@@ -126,6 +126,8 @@ int main(int argc, char* argv[])
     fs::path root_path(dir);
 
     tagtree::Storage* storage = nullptr;
+
+    tsdb::base::Logger::setLogLevel(tsdb::base::Logger::NUM_LOG_LEVELS);
 
     tsdb::db::DB db(root_path.string());
     tsdb::db::DBAdapter adapter(&db);
