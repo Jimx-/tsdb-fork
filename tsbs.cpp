@@ -38,7 +38,8 @@ cxxopts::ParseResult parse(int argc, char* argv[])
             cxxopts::value<double>()->default_value("0.0"))(
             "n,ncpu", "Number of workers",
             cxxopts::value<size_t>()->default_value("8"))(
-            "b,bitmap", "Use bitmap-only mode")("h,help", "Print help");
+            "b,bitmap", "Use bitmap-only mode")("f,full", "Use full DB mode")(
+            "h,help", "Print help");
 
         auto result = options.parse(argc, argv);
 
@@ -107,38 +108,40 @@ int main(int argc, char* argv[])
     std::string workload;
     size_t cache_size;
     size_t ncpu;
-    bool bitmap_only;
+    bool bitmap_only, full_db;
     try {
         dir = get_arg<std::string>(result, "root");
         workload = get_arg<std::string>(result, "workload");
         cache_size = result["cache-size"].as<size_t>();
         ncpu = result["ncpu"].as<size_t>();
         bitmap_only = result["bitmap"].as<bool>();
+        full_db = result["full"].as<bool>();
     } catch (const OptionException& e) {
         std::cerr << "Failed to parse options: " << e.what() << std::endl;
         exit(1);
     }
 
-    // std::string dir = "./s10m-i1m-100000-3";
-    // std::string dir = "./s1d-i1h-20000-2";
-    // std::string dir = "./s1d-i10m-10000-2";
-
     fs::path root_path(dir);
+    fs::path index_path;
 
     tagtree::Storage* storage = nullptr;
 
-    tsdb::base::Logger::setLogLevel(tsdb::base::Logger::NUM_LOG_LEVELS);
+    if (full_db) {
+        tsdb::base::Logger::setLogLevel(tsdb::base::Logger::NUM_LOG_LEVELS);
 
-    tsdb::db::DB db(root_path.string());
-    tsdb::db::DBAdapter adapter(&db);
-    fs::path index_path = root_path / "index";
+        tsdb::db::DB* db = new tsdb::db::DB(root_path.string());
+        storage = new tsdb::db::DBAdapter(db);
+
+        index_path = root_path / "index";
+
+        fs::create_directory(index_path);
+    } else {
+        storage = new NullStorage();
+
+        index_path = root_path;
+    }
+
     fs::path series_path = index_path / "series";
-
-    fs::create_directory(index_path);
-
-    NullStorage null_storage;
-
-    storage = &adapter;
 
     tagtree::SeriesFileManager sfm(cache_size, series_path.string(), 50000);
     tagtree::prom::IndexedStorage indexed_storage(index_path.string(), 4096,
