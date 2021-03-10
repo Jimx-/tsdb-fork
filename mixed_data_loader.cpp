@@ -88,7 +88,7 @@ void MixedDataLoader::load(tagtree::prom::IndexedStorage& storage,
                     app->commit();
                 } else {
                     std::vector<promql::LabelMatcher> matchers;
-                    auto q = storage.querier(1, 100);
+                    auto q = storage.querier(1569888000000, 1569888002000);
 
                     for (auto&& lab : labs) {
                         matchers.push_back(

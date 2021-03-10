@@ -76,6 +76,9 @@ void bench_query(tagtree::prom::IndexedStorage& storage, int query_type)
         {{promql::MatchOp::EQL, "__name__", "cpu"},
          {promql::MatchOp::NEQ, "__metric__", "usage_user"},
          {promql::MatchOp::EQL_REGEX, "hostname", "host_1\\d{3}$"}},
+        {{promql::MatchOp::EQL, "__name__", "cpu"},
+         {promql::MatchOp::NEQ, "__metric__", "usage_user"},
+         {promql::MatchOp::NEQ_REGEX, "hostname", "host_1\\d{3}$"}},
     };
 
     std::cout << "time,count" << std::endl;
@@ -166,7 +169,7 @@ int main(int argc, char* argv[])
         try {
             query_type = get_arg<int>(result, "query");
 
-            if (query_type <= 0 || query_type > 3) {
+            if (query_type <= 0 || query_type > 4) {
                 throw OptionException("invalid query type");
             }
         } catch (const OptionException& e) {

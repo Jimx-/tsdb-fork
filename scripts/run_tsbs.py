@@ -2,10 +2,15 @@ import argparse
 import os
 import subprocess
 import sys
+import shutil
 
-DATASETS = ('s1d-i10m-10000', 's1d-i1h-20000', 's10m-i1m-100000',
-            's1d-i1h-100000', 's10h-i1h-1000000')
-DATASETS_N = (100000, 200000, 1000000, 1000000, 10000000)
+#DATASETS = ('s1d-i10m-10000', 's1d-i1h-20000', 's10m-i1m-100000',
+#            's1d-i1h-100000', 's10h-i1h-1000000')
+#DATASETS_N = (100000, 200000, 1000000, 1000000, 10000000)
+
+DATASETS = ('s1d-i1h-20000', 's1d-i1h-100000', 's10h-i1h-1000000')
+DATASETS_N = (200000, 1000000, 10000000)
+DATASETS_IDX = (2, 4, 5)
 
 
 def run_benchmark(benchmark_path, dataset_path, full_db):
@@ -106,6 +111,10 @@ def run_insert(benchmark_path, dataset_path, result_path, full_db):
 
     for dataset in DATASETS:
         data_path = make_data_path(benchmark_path, dataset, full_db, False)
+        backup_path = data_path + '_backup'
+        if not os.path.exists(backup_path):
+            shutil.copytree(data_path, backup_path)
+        continue
 
         cmd = '{}/tsbs -w insert -r {} -d {} {}'.format(
             benchmark_path, data_path,
@@ -148,8 +157,8 @@ def run_query(benchmark_path,
             with open(
                     os.path.join(
                         result_path, 's{}-q{}-{}-query.txt'.format(
-                            s, q, make_label(full_db, bitmap_only))),
-                    'w') as f:
+                            DATASETS_IDX[s - 1], q,
+                            make_label(full_db, bitmap_only))), 'w') as f:
                 print('Benchmarking query for s{}-q{} {}...'.format(
                     s, q, make_label(full_db, bitmap_only)))
                 code = subprocess.call(cmd.split(' '), stdout=f)
@@ -168,18 +177,19 @@ def run_mixed(benchmark_path, dataset_path, result_path, full_db):
         data_path = os.path.join(
             benchmark_path, 'bench',
             dataset + '-mixed' + (full_db and '-full' or ''))
-        try:
-            os.makedirs(data_path)
-        except FileExistsError:
-            pass
+        backup_path = make_data_path(benchmark_path, dataset, full_db, True)
 
         for ratio in (0.0, 0.3, 0.7, 1.0):
             for size in (0.1, 0.4, 0.7, 1.0):
+                if os.path.exists(data_path):
+                    shutil.rmtree(data_path)
+                shutil.copytree(backup_path, data_path)
+
                 cmd = '{}/tsbs -w mixed -r {} -d {} -a 1.5 -s {} -t {} {}'.format(
                     benchmark_path, data_path,
                     os.path.join(dataset_path,
                                  'prometheus-data-cpu-only-' + dataset),
-                    int(size * N), ratio, make_option(full_db, False))
+                    int(size * N), ratio, make_option(full_db, True))
 
                 with open(
                         os.path.join(
