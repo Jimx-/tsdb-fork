@@ -84,3 +84,6 @@ target_link_libraries(tsdb ${LIBRARIES})
 
 add_executable(tsbs tsbs.cpp base_data_loader.cpp insert_data_loader.cpp genzipf.c mixed_data_loader.cpp)
 target_link_libraries(tsbs ${LIBRARIES})
+
+add_executable(nebench nebench.cpp)
+target_link_libraries(nebench ${LIBRARIES})

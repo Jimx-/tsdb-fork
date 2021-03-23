@@ -39,7 +39,11 @@ private:
 class SeriesSetAdapter : public tagtree::SeriesSet {
 public:
     SeriesSetAdapter(std::shared_ptr<SeriesSetInterface> ss) : ss(ss) {}
-    virtual bool next() { return ss->next(); }
+    virtual bool next()
+    {
+        if (ss) return ss->next();
+        return false;
+    }
     virtual std::shared_ptr<tagtree::Series> at()
     {
         return std::make_shared<SeriesAdapter>(ss->at());
