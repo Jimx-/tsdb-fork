@@ -2,6 +2,8 @@
 #include <boost/filesystem.hpp>
 #include <limits>
 
+#include <sched.h>
+
 #include "base/Logging.hpp"
 #include "base/TimeStamp.hpp"
 #include "base/WaitGroup.hpp"

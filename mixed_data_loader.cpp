@@ -46,9 +46,11 @@ void MixedDataLoader::load(tagtree::prom::IndexedStorage& storage,
     queried_rows.store(0);
     std::vector<std::thread> threads;
     for (int i = 0; i < num_workers; i++) {
-        threads.emplace_back([this, &storage, i, N]() {
-            for (int k = 0; k < N / 10; k++) {
-                int r = zipf(this->alpha, N);
+        threads.emplace_back([this, &storage, i, N, num_workers]() {
+            auto zipf_N = std::min(N, 100000);
+
+            for (int k = 0; k < N / num_workers; k++) {
+                int r = zipf(this->alpha, zipf_N);
                 auto row = this->dataset[r - 1];
 
                 std::vector<std::string> args, tags, metrics;
@@ -88,7 +90,7 @@ void MixedDataLoader::load(tagtree::prom::IndexedStorage& storage,
                     app->commit();
                 } else {
                     std::vector<promql::LabelMatcher> matchers;
-                    auto q = storage.querier(1569888000000, 1569888002000);
+                    auto q = storage.querier(1569888000000, 1569974400000);
 
                     for (auto&& lab : labs) {
                         matchers.push_back(

@@ -51,6 +51,11 @@ int main()
     tagtree::prom::IndexedStorage indexed_storage(temp_path.c_str(), 4096,
                                                   &null_storage, &sfm);
 
+    sfm.add(1, {{"a", "1"}, {"b", "2"}, {"c", "3"}});
+    sfm.add(2, {{"a", "2"}, {"b", "3"}, {"c", "4"}});
+    std::cout << sfm.get_by_label_set({{"a", "1"}, {"b", "2"}, {"c", "3"}})
+              << std::endl;
+    return 0;
     {
         auto appender = indexed_storage.appender();
         uint64_t t = 1000;
