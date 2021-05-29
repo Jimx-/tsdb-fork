@@ -87,3 +87,6 @@ target_link_libraries(tsbs ${LIBRARIES})
 
 add_executable(nebench nebench.cpp)
 target_link_libraries(nebench ${LIBRARIES})
+
+add_executable(test test.cpp)
+target_link_libraries(test ${LIBRARIES})
