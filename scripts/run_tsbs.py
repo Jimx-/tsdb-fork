@@ -3,6 +3,8 @@ import os
 import subprocess
 import sys
 import shutil
+import psutil
+import time
 
 #DATASETS = ('s1d-i10m-10000', 's1d-i1h-20000', 's10m-i1m-100000',
 #            's1d-i1h-100000', 's10h-i1h-1000000')
@@ -33,18 +35,20 @@ def run_benchmark(benchmark_path, dataset_path, full_db):
             return retval
 
     # Randomized time range query.
-
-    # if not full_db:
-    #     retval = run_query(benchmark_path, dataset_path, result_path, full_db,
-    #                        False, True)
-    #     if retval != 0:
-    #         return retval
+    if not full_db:
+        retval = run_query(benchmark_path, dataset_path, result_path, full_db,
+                           False, True)
+        if retval != 0:
+            return retval
 
     # Bitmap-only fresh insert.
     retval = run_insert_fresh(benchmark_path, dataset_path, result_path,
                               full_db, True)
     if retval != 0:
         return retval
+
+    # retval = run_query_resource(benchmark_path, dataset_path, result_path,
+    #                             full_db, True)
 
     if not full_db:
         # Bitmap-only query.
@@ -295,6 +299,52 @@ def run_insert_checkpoint(benchmark_path, dataset_path, result_path):
             if code != 0:
                 print('Non-zero return code for {}: {}'.format(dataset, code))
                 retval = code
+
+    return retval
+
+
+def run_query_resource(benchmark_path,
+                       dataset_path,
+                       result_path,
+                       full_db,
+                       bitmap_only=False,
+                       randomize=False):
+    retval = 0
+
+    for s, (dataset, N) in enumerate(zip(DATASETS, DATASETS_N), 1):
+        data_path = make_data_path(benchmark_path, dataset, full_db,
+                                   bitmap_only)
+
+        for q in range(1, 3):
+            cmd = '{}/tsbs -w query -r {} -q {} -g {} {} -k {} -s {}'.format(
+                benchmark_path, data_path, q, DATASETS_IDX[s - 1],
+                make_option(full_db, bitmap_only, randomize), q <= 2 and 10000
+                or 4, int(N * 0.1))
+
+            with open(
+                    os.path.join(
+                        result_path, 's{}-q{}-{}-query-resource.txt'.format(
+                            DATASETS_IDX[s - 1], q,
+                            make_label(full_db, bitmap_only, randomize))),
+                    'w') as f:
+                print('Benchmarking query for s{}-q{} {}...'.format(
+                    s, q, make_label(full_db, bitmap_only, randomize)))
+                p = subprocess.Popen(cmd.split(' '))
+                proc = psutil.Process(p.pid)
+
+                f.write('cpu,rss,vms\n')
+                code = p.poll()
+                while code == None:
+                    cpu_percent = proc.cpu_percent()
+                    mem_info = proc.memory_info()
+                    f.write(f'{cpu_percent},{mem_info.rss},{mem_info.vms}\n')
+                    time.sleep(1)
+                    code = p.poll()
+
+                if code != 0:
+                    print('Non-zero return code for s{}-q{}: {}'.format(
+                        s, q, code))
+                    retval = code
 
     return retval
 

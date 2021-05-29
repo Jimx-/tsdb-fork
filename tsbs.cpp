@@ -46,7 +46,9 @@ cxxopts::ParseResult parse(int argc, char* argv[])
                                                        "Randomize time range")(
             "c,checkpoint", "Checkpoint policy",
             cxxopts::value<std::string>()->default_value("normal"))(
-            "h,help", "Print help");
+            "k,runs", "Repeated runs of query",
+            cxxopts::value<int>()->default_value("100"))("h,help",
+                                                         "Print help");
 
         auto result = options.parse(argc, argv);
 
@@ -99,7 +101,7 @@ std::tuple<uint64_t, uint64_t> get_time_range(int time_range, bool randomize)
 }
 
 void bench_query(tagtree::prom::IndexedStorage& storage, int query_type,
-                 int time_range, bool randomize)
+                 int runs, int time_range, bool randomize)
 {
     // const std::vector<promql::LabelMatcher> queries[]{
     //     {{promql::MatchOp::EQL, "__name__", "cpu"},
@@ -164,7 +166,7 @@ void bench_query(tagtree::prom::IndexedStorage& storage, int query_type,
 
     std::cout << "time,count" << std::endl;
 
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < runs; i++) {
         auto t1 = Clock::now();
         auto [start, end] = get_time_range(time_range, randomize);
         auto q = storage.querier(start, end);
@@ -193,7 +195,7 @@ int main(int argc, char* argv[])
     std::string workload, checkpoint_option;
     size_t cache_size;
     size_t ncpu;
-    int time_range;
+    int time_range, query_runs;
     bool bitmap_only, full_db, partial_cache, randomize;
     try {
         dir = get_arg<std::string>(result, "root");
@@ -206,6 +208,7 @@ int main(int argc, char* argv[])
 
         time_range = result["range"].as<int>();
         randomize = result["randomize"].as<bool>();
+        query_runs = result["runs"].as<int>();
 
         checkpoint_option = result["checkpoint"].as<std::string>();
     } catch (const OptionException& e) {
@@ -213,13 +216,13 @@ int main(int argc, char* argv[])
         exit(1);
     }
 
-    // tagtree::CheckpointPolicy checkpoint_policy =
-    //     tagtree::CheckpointPolicy::NORMAL;
+    tagtree::CheckpointPolicy checkpoint_policy =
+        tagtree::CheckpointPolicy::NORMAL;
 
-    // if (checkpoint_option == "disabled")
-    //     checkpoint_policy = tagtree::CheckpointPolicy::DISABLED;
-    // else if (checkpoint_option == "print")
-    //     checkpoint_policy = tagtree::CheckpointPolicy::PRINT;
+    if (checkpoint_option == "disabled")
+        checkpoint_policy = tagtree::CheckpointPolicy::DISABLED;
+    else if (checkpoint_option == "print")
+        checkpoint_policy = tagtree::CheckpointPolicy::PRINT;
 
     fs::path root_path(dir);
     fs::path index_path;
@@ -244,8 +247,9 @@ int main(int argc, char* argv[])
     fs::path series_path = index_path / "series";
 
     tagtree::SeriesFileManager sfm(cache_size, series_path.string(), 50000);
-    tagtree::prom::IndexedStorage indexed_storage(index_path.string(), 4096,
-                                                  storage, &sfm, bitmap_only);
+    tagtree::prom::IndexedStorage indexed_storage(
+        index_path.string(), 4096, storage, &sfm, bitmap_only, !partial_cache,
+        checkpoint_policy);
 
     if (workload == "insert") {
         std::string data_dir;
@@ -274,7 +278,8 @@ int main(int argc, char* argv[])
             exit(1);
         }
 
-        bench_query(indexed_storage, query_type, time_range, randomize);
+        bench_query(indexed_storage, query_type, query_runs, time_range,
+                    randomize);
     } else if (workload == "mixed") {
         std::string data_dir;
         double alpha;
