@@ -9,9 +9,9 @@ identifier -> (t0, v0), (t1, v1), (t2, v2), (t3, v3), ....
 #+END_EXAMPLE
 ** Identifier (label set)
 The name outside the braces defines the measurement.
-`requests_total{path="/status", method="GET", instance=”10.0.0.1:80”}`
+~requests_total{path="/status", method="GET", instance=”10.0.0.1:80”}~
 The measurement can be converted to a label set (used in tsdb internally).
-`{__name__="requests_total", path="/status", method="GET", instance=”10.0.0.1:80”}`
+~{__name__="requests_total", path="/status", method="GET", instance=”10.0.0.1:80”}~
 
 
 * Example
