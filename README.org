@@ -1,0 +1,106 @@
+#+TITLE: TagTree/TSDB
+
+A full time series database built on TagTree and a C++ reimplementation of Prometheus' tsdb storage backend.
+
+* Introduction
+** Time series
+#+BEGIN_EXAMPLE
+identifier -> (t0, v0), (t1, v1), (t2, v2), (t3, v3), ....
+#+END_EXAMPLE
+** Identifier (label set)
+The name outside the braces defines the measurement.
+`requests_total{path="/status", method="GET", instance=”10.0.0.1:80”}`
+The measurement can be converted to a label set (used in tsdb internally).
+`{__name__="requests_total", path="/status", method="GET", instance=”10.0.0.1:80”}`
+
+
+* Example
+#+BEGIN_SRC cpp
+#include <deque>
+#include <iostream>
+#include "db/DB.hpp"                // Include the DB api.
+#include "label/EqualMatcher.hpp"   // EqualMatcher matches <label name, label value> exactly.
+
+int main(){
+    db::DB db("db_test");   // Create DB under db_test folder.
+
+    // Generate 10 Labels to represent 10 time series.
+    std::deque<label::Labels> lsets({
+        {{"a", "1"}, {"b", "1"}},
+        {{"a", "2"}, {"c", "1"}},
+        {{"a", "3"}, {"d", "1"}},
+        {{"a", "4"}, {"e", "1"}},
+        {{"a", "5"}, {"f", "1"}},
+        {{"a", "6"}, {"g", "1"}},
+        {{"a", "7"}, {"h", "1"}},
+        {{"a", "8"}, {"i", "1"}},
+        {{"a", "9"}, {"j", "1"}},
+        {{"a", "10"}, {"k", "1"}},
+    });
+
+    // Append some data points for each time series.
+    std::deque<pair<int64_t, double>> data({{1,1.1},{2,2.2},{3,3.3},{4,4.4},{5,5.5},{100,100.1},{200,200.2}});
+    auto app = db.appender();                           // Create DB appender.
+    for(auto & d: data){                                // For each data point.
+        for(auto & lset: lsets){                        // For each time series
+            auto p = app->add(lset, d.first, d.second); // Append data point.
+        }
+        auto e = app->commit();                         // Commit the appended data and they will be flushed to disk.
+    }
+
+    // Query data in time range [1, 1000].
+    auto q = db.querier(1, 1000);                       // Create DB querier for time range [1, 1000].
+                                                        // Select time series which contains Label <"a", "1">.
+    auto s = q.first->select({shared_ptr<label::MatcherInterface>(new label::EqualMatcher("a", "1"))});
+    while(s->next()){                                   // For each time series contains <"a", "1">.
+        auto si = s->at();                              // Get current time series.
+        auto it = si->iterator();                       // Get chunk iterator of current time series.
+        int i = 0;
+        while(it->next()){                              // Iterate chunk.
+            std::cout << it->at() << std::endl;
+            ++ i;
+        }
+    }
+
+    // Delete data inside time range [1, 100] of time series containing Label <"k", "1">.
+    db.del(1, 100, {shared_ptr<label::MatcherInterface>(new label::EqualMatcher("k", "1"))})
+    return 0;
+}
+#+END_SRC
+
+* Build & Test
+To build the full TSDB and benchmark, run
+#+BEGIN_SRC shell
+$ git submodule update --init
+$ mkdir build && cd build
+$ cmake .. && make
+#+END_SRC
+
+This will build the main executable ~tsbs~ for benchmarking the system with TSBS.
+
+* TSBS Evaluation
+** Datasets
+The datasets needed for the evaluation can be generated with the [[https://github.com/timescale/tsbs][original TSBS]]:
+#+BEGIN_SRC shell
+$ mkdir ~/prometheus-datasets
+$ tsbs_generate_data --use-case="cpu-only" --seed=123 --scale=20000 \
+    --timestamp-start="2019-10-01T00:00:00Z" \
+    --timestamp-end="2019-10-02T00:00:00Z" \
+    --log-interval="1h" --format="influxdb" > ~/prometheus-datasets/prometheus-data-cpu-only-s1d-i1h-20000
+$ tsbs_generate_data --use-case="cpu-only" --seed=123 --scale=100000 \
+    --timestamp-start="2019-10-01T00:00:00Z" \
+    --timestamp-end="2019-10-02T00:00:00Z" \
+    --log-interval="1h" --format="influxdb" > ~/prometheus-datasets/prometheus-data-cpu-only-s1d-i1h-100000
+$ tsbs_generate_data --use-case="cpu-only" --seed=123 --scale=1000000 \
+    --timestamp-start="2019-10-01T00:00:00Z" \
+    --timestamp-end="2019-10-01T10:00:00Z" \
+    --log-interval="1h" --format="influxdb" > ~/prometheus-datasets/prometheus-data-cpu-only-s10h-i1h-1000000
+#+END_SRC
+
+** Main evaluation
+The main evaluation can be done using ~scripts/run_tsbs.py~:
+#+BEGIN_SRC shell
+$ python3 scripts/run_tsbs.py --benchmark-path build --dataset-path=$HOME/prometheus-datasets
+#+END_SRC
+
+This will create result files under ~build/bench-results~.
